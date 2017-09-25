@@ -164,7 +164,7 @@ def detect_faces_and_extract_features(img_path, ctx_static, ctx_active):
     faces_cnt += len(bboxes)
 
     print("\n===> Extracting features for %d faces, costs %f seconds, avg time: %f seconds" % (
-        faces_cnt, ttl_det_time, ttl_det_time / faces_cnt))
+        faces_cnt, ttl_feat_time, ttl_feat_time / faces_cnt))
 
     for i, box in enumerate(bboxes):
         feat_file = '%s_%d_rect[%d_%d_%d_%d].npy' % (

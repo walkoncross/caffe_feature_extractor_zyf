@@ -168,7 +168,7 @@ def main(argv):
         faces_cnt += len(bboxes)
 
         print("\n===> Extracint features for %d faces, costs %f seconds, avg time: %f seconds" % (
-            faces_cnt, ttl_det_time, ttl_det_time / faces_cnt))
+            faces_cnt, ttl_feat_time, ttl_feat_time / faces_cnt))
 
         for i, box in enumerate(bboxes):
             feat_file = '%s_%d_rect[%d_%d_%d_%d].npy' % (
@@ -206,13 +206,15 @@ def main(argv):
 
 if __name__ == '__main__':
     argv = []
+    if len(sys.argv) < 2:
+        img_list = './list_img.txt'
 
-    img_list = './list_img.txt'
-
-    argv.append(img_list)
-#    argv.append('--no_detect')
-    argv.append('--no_align')
-    argv.append('--show_image')
-    argv.append('--save_image')
+        argv.append(img_list)
+    #    argv.append('--no_detect')
+        argv.append('--no_align')
+        argv.append('--show_image')
+        argv.append('--save_image')
+    else:
+        argv = sys.argv[1:]
 
     main(argv)
