@@ -38,12 +38,13 @@ class CaffeFeatureExtractor(object):
             'image_as_grey': False
         }
 
-        if osp.isfile(config_json):
-            fp = open(config_json, 'r')
-            _config = json.load(fp)
-            fp.close()
-        elif isinstance(config_json, str):
-            _config = json.loads(config_json)
+        if isinstance(config_json, str):
+            if osp.isfile(config_json):
+                fp = open(config_json, 'r')
+                _config = json.load(fp)
+                fp.close()
+            else:
+                _config = json.loads(config_json)
         else:
             _config = config_json
 
