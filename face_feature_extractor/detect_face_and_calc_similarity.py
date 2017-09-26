@@ -169,14 +169,26 @@ def detect_faces_and_extract_features(img_path, ctx_static, ctx_active):
         faces_cnt, ttl_feat_time, ttl_feat_time / faces_cnt))
 
     for i, box in enumerate(bboxes):
-        feat_file = '%s_%d_rect[%d_%d_%d_%d].npy' % (
-            osp.basename(img_path), i, box[0], box[1], box[2], box[3])
-        feat_file = osp.join(save_dir, feat_file)
+        # feat_file = '%s_%d_rect[%d_%d_%d_%d].npy' % (
+        #     osp.basename(img_path), i, box[0], box[1], box[2], box[3])
+        # feat_file = osp.join(save_dir, feat_file)
 
-        np.save(feat_file, features[i])
+        # np.save(feat_file, features[i])
+
+        # rlt['faces'][i]['feat'] = feat_file
+        base_name = osp.basename(img_path)
+
+        face_fn_prefix = '%s_face_%d' % (osp.splitext(base_name)[0], i)
+
+        feat_file = face_fn_prefix + '.npy'
+        np.save(osp.join(save_dir, feat_file), features[i])
+
+        face_chip_fn = face_fn_prefix + '.jpg'
+        cv2.imwrite(osp.join(save_dir, face_chip_fn), face_chips[i])
 
         rlt['faces'][i]['feat'] = feat_file
-
+        rlt['faces'][i]['face_chip'] = face_chip_fn
+        
     rlt['message'] = 'success'
 
     if save_img or show_img:

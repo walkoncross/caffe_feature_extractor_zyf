@@ -151,7 +151,11 @@ def main(argv):
         else:
             bboxes = None
 
-        if bboxes is not None and len(bboxes) > 0:
+        n_faces = 0
+        if bboxes is not None:
+            n_faces = len(bboxes)
+
+        if n_faces > 0:
             for (box, pts) in zip(bboxes, points):
                 #                box = box.tolist()
                 #                pts = pts.tolist()
@@ -161,7 +165,7 @@ def main(argv):
                        }
                 rlt['faces'].append(tmp)
 
-            rlt['face_count'] = len(bboxes)
+            rlt['face_count'] = n_faces
 
 #        print('output bboxes: ' + str(bboxes))
 #        print('output points: ' + str(points))
@@ -169,8 +173,9 @@ def main(argv):
 
         print("\n===> Detect %d images, costs %f seconds, avg time: %f seconds" % (
             img_cnt, ttl_det_time, ttl_det_time / img_cnt))
+        print "---> %d faces detected" % n_faces
 
-        if bboxes is None:
+        if not n_faces:
             continue
 
         t1 = time.clock()
@@ -179,20 +184,30 @@ def main(argv):
         t2 = time.clock()
         ttl_feat_time += t2 - t1
         print("Cropping and extracting features for %d faces cost %f seconds" %
-              (len(bboxes), t2 - t1))
-        faces_cnt += len(bboxes)
+              (n_faces, t2 - t1))
+        faces_cnt += n_faces
 
-        print("\n===> Extracint features for %d faces, costs %f seconds, avg time: %f seconds" % (
+        print("\n===> Extracting features for %d faces, costs %f seconds, avg time: %f seconds" % (
             faces_cnt, ttl_feat_time, ttl_feat_time / faces_cnt))
 
         for i, box in enumerate(bboxes):
-            feat_file = '%s_%d_rect[%d_%d_%d_%d].npy' % (
-                osp.basename(img_path), i, box[0], box[1], box[2], box[3])
-            feat_file = osp.join(save_dir, feat_file)
+            # feat_file = '%s_%d_rect[%d_%d_%d_%d].npy' % (
+            #     osp.basename(img_path), i, box[0], box[1], box[2], box[3])
+            # feat_file = osp.join(save_dir, feat_file)
+            # np.save(feat_file, features[i])
 
-            np.save(feat_file, features[i])
+            base_name = osp.basename(img_path)
+
+            face_fn_prefix = '%s_face_%d' % (osp.splitext(base_name)[0], i)
+
+            feat_file = face_fn_prefix + '.npy'
+            np.save(osp.join(save_dir, feat_file), features[i])
+
+            face_chip_fn = face_fn_prefix + '.jpg'
+            cv2.imwrite(osp.join(save_dir, face_chip_fn), face_chips[i])
 
             rlt['faces'][i]['feat'] = feat_file
+            rlt['faces'][i]['face_chip'] = face_chip_fn
 
         rlt['message'] = 'success'
 #        result_list.append(rlt)
@@ -226,13 +241,16 @@ def main(argv):
 if __name__ == '__main__':
     argv = []
     if len(sys.argv) < 2:
-        img_list = './list_img.txt'
+        img_list = './list_img_tianyan.txt'
 
         argv.append(img_list)
-    #    argv.append('--no_detect')
+#        argv.append('--no_detect')
         argv.append('--no_align')
-        argv.append('--show_image')
+#        argv.append('--show_image')
         argv.append('--save_image')
+
+        save_dir = './tianyan_test_pics'
+        argv.append('--save_dir='+save_dir)
     else:
         argv = sys.argv[1:]
 
