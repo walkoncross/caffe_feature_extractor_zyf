@@ -95,11 +95,11 @@ def detect_faces_and_extract_features(img_path, ctx_static, ctx_active):
         rlt["message"] = "failed to load"
 
         ctx_active['img_cnt'] = img_cnt
-        ctx_active['faces_cnt'] =  faces_cnt
+        ctx_active['faces_cnt'] = faces_cnt
         ctx_active['ttl_det_time'] = ttl_det_time
         ctx_active['ttl_feat_time'] = ttl_feat_time
 
-        return rlt,None
+        return rlt, None
 
     if img is None:
         print('failed to load image: ' + img_path)
@@ -107,7 +107,7 @@ def detect_faces_and_extract_features(img_path, ctx_static, ctx_active):
         rlt["message"] = "failed to load"
 
         ctx_active['img_cnt'] = img_cnt
-        ctx_active['faces_cnt'] =  faces_cnt
+        ctx_active['faces_cnt'] = faces_cnt
         ctx_active['ttl_det_time'] = ttl_det_time
         ctx_active['ttl_feat_time'] = ttl_feat_time
 
@@ -143,7 +143,7 @@ def detect_faces_and_extract_features(img_path, ctx_static, ctx_active):
 
     if bboxes is None:
         ctx_active['img_cnt'] = img_cnt
-        ctx_active['faces_cnt'] =  faces_cnt
+        ctx_active['faces_cnt'] = faces_cnt
         ctx_active['ttl_det_time'] = ttl_det_time
         ctx_active['ttl_feat_time'] = ttl_feat_time
 
@@ -192,17 +192,23 @@ def detect_faces_and_extract_features(img_path, ctx_static, ctx_active):
 #                break
 
     ctx_active['img_cnt'] = img_cnt
-    ctx_active['faces_cnt'] =  faces_cnt
+    ctx_active['faces_cnt'] = faces_cnt
     ctx_active['ttl_det_time'] = ttl_det_time
     ctx_active['ttl_feat_time'] = ttl_feat_time
 
     return rlt, features, face_chips
 
+
 def calc_similarity(feat1, feat2):
     feat1_norm = norm(feat1)
     feat2_norm = norm(feat2)
 
+    print 'feat1_norm:', feat1_norm
+    print 'feat2_norm:', feat2_norm
+
     sim = np.dot(feat1, feat2) / (feat1_norm * feat2_norm)
+
+    print 'sim:', sim
 
     return sim
 
@@ -248,7 +254,7 @@ def main(argv):
     ctx_static = {}
     #ctx_static['args'] = args
     ctx_static['detector'] = detector
-    ctx_static['aligner'] =  aligner
+    ctx_static['aligner'] = aligner
     ctx_static['feature_extractor'] = feature_extractor
     ctx_static['do_detect'] = do_detect
     ctx_static['do_align'] = do_align
@@ -257,7 +263,7 @@ def main(argv):
     ctx_static['save_dir'] = save_dir
     ctx_static['max_faces'] = max_faces
 
-    result_list = []
+#    result_list = []
     img_cnt = 0
     faces_cnt = 0
     ttl_det_time = 0.0
@@ -266,39 +272,57 @@ def main(argv):
     ctx_active = {}
     #ctx_active['result_list'] = result_list
     ctx_active['img_cnt'] = img_cnt
-    ctx_active['faces_cnt'] =  faces_cnt
+    ctx_active['faces_cnt'] = faces_cnt
     ctx_active['ttl_det_time'] = ttl_det_time
     ctx_active['ttl_feat_time'] = ttl_feat_time
 
     fp = open(args.img_list_file, 'r')
     fp_rlt = open(osp.join(save_dir, 'face_feature.json'), 'w')
+    fp_rlt.write('[\n')
+    write_comma_flag = False
 
     while True:
-        line  = fp.readline()
+        line = fp.readline().strip()
         if not line:
             break
 
         img_path = get_image_path(line, args.image_root_dir)
 
-        rlt, features, face_chips = detect_faces_and_extract_features(img_path, ctx_static, ctx_active)
-        result_list.append(rlt)
+        rlt, features, face_chips = detect_faces_and_extract_features(
+            img_path, ctx_static, ctx_active)
 
-        line  = fp.readline()
+        # result_list.append(rlt)
+        if write_comma_flag:
+            fp_rlt.write(',\n')
+        else:
+            write_comma_flag = True
+
+        json_str = json.dumps(rlt, indent=2)
+        fp_rlt.write(json_str)
+        fp_rlt.flush()
+
+        line = fp.readline().strip()
         if not line:
             break
+
         img_path2 = get_image_path(line, args.image_root_dir)
 
-        rlt2, features2, face_chips2 = detect_faces_and_extract_features(img_path2, ctx_static, ctx_active)
-        result_list.append(rlt2)
+        rlt2, features2, face_chips2 = detect_faces_and_extract_features(
+            img_path2, ctx_static, ctx_active)
+
+        # result_list.append(rlt2)
+        json_str = json.dumps(rlt, indent=2)
+        fp_rlt.write(',\n' + json_str)
+        fp_rlt.flush()
 
         if rlt['face_count'] and rlt2['face_count']:
-#            sim = calc_similarity(features[0], features2[0])
-#            img_pair = np.hstack((face_chips[0], face_chips2[0]))
-#            img_pair_fn = '%s_%d_vs_%s_%d_%5.4f.jpg' % (osp.basename(img_path), 0, osp.basename(img_path2), 0, sim)
-#            img_pair_fn = osp.join(pair_save_dir, img_pair_fn)
-#            cv2.imwrite(img_pair_fn, img_pair)
-#
-#            print '---> similarity: ', sim
+            #            sim = calc_similarity(features[0], features2[0])
+            #            img_pair = np.hstack((face_chips[0], face_chips2[0]))
+            #            img_pair_fn = '%s_%d_vs_%s_%d_%5.4f.jpg' % (osp.basename(img_path), 0, osp.basename(img_path2), 0, sim)
+            #            img_pair_fn = osp.join(pair_save_dir, img_pair_fn)
+            #            cv2.imwrite(img_pair_fn, img_pair)
+            #
+            #            print '---> similarity: ', sim
 
             for j in range(rlt['face_count']):
                 for i in range(rlt2['face_count']):
@@ -306,16 +330,20 @@ def main(argv):
 
                     img_pair = np.hstack((face_chips[j], face_chips2[i]))
 
-                    img_pair_fn = '%s_%d_vs_%s_%d_%5.4f.jpg' % (osp.basename(img_path), j, osp.basename(img_path2), i, sim)
+                    img_pair_fn = '%s_%d_vs_%s_%d_%5.4f.jpg' % (
+                        osp.basename(img_path), j, osp.basename(img_path2), i, sim)
                     img_pair_fn = osp.join(pair_save_dir, img_pair_fn)
 
                     sim_txt = '%5.4f' % sim
-                    cv2_put_text_to_image(img_pair, sim_txt, 40, 5, 30, (0,0,255))
+                    cv2_put_text_to_image(
+                        img_pair, sim_txt, 40, 5, 30, (0, 0, 255))
                     cv2.imwrite(img_pair_fn, img_pair)
 
                     print '---> similarity: ', sim
 
-    json.dump(result_list, fp_rlt, indent=2)
+    # json.dump(result_list, fp_rlt, indent=2)
+    fp_rlt.write('\n]\n')
+
     fp_rlt.close()
     fp.close()
 
