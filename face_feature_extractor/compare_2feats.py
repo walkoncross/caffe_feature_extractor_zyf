@@ -9,11 +9,14 @@ from numpy.linalg import norm
 
 
 def load_npy(npy_file):
-	mat = None
-	if osp.exists(npy_file):
-		mat = np.load(npy_file)
+    mat = None
+    if osp.exists(npy_file):
+        mat = np.load(npy_file)
+    else:
+        print 'Can not find file: ', npy_file
 
-	return mat
+    return mat
+
 
 def calc_similarity(feat1, feat2):
     feat1_norm = norm(feat1)
@@ -23,12 +26,15 @@ def calc_similarity(feat1, feat2):
 
     return sim
 
+
 def compare_feats(file1, file2):
+    print 'Load feat file 1: ', file1
     ft1 = load_npy(file1)
     if ft1 is None:
         print "Failed to load feature1's .npy"
         return None
 
+    print 'Load feat file 2: ', file2
     ft2 = load_npy(file2)
     if ft2 is None:
         print "Failed to load feature2's .npy"
@@ -39,8 +45,9 @@ def compare_feats(file1, file2):
 
     return sim
 
-if __name__=='__main__':
-    if len(sys.argv)>3:
+
+if __name__ == '__main__':
+    if len(sys.argv) >= 2:
         file1 = sys.argv[1]
         file2 = sys.argv[2]
     else:
