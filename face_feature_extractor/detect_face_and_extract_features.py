@@ -84,8 +84,10 @@ def main(argv):
 
     fp = open(args.img_list_file, 'r')
     fp_rlt = open(osp.join(save_dir, 'face_feature.json'), 'w')
+    fp_rlt.write('[\n')
+    write_comma_flag = False
 
-    result_list = []
+    # result_list = []
     img_cnt = 0
     faces_cnt = 0
     ttl_det_time = 0.0
@@ -102,6 +104,12 @@ def main(argv):
             print 'skip line starts with #, skip to next'
             continue
 
+        # result_list.append(rlt)
+        if write_comma_flag:
+            fp_rlt.write(',\n')
+        else:
+            write_comma_flag = True
+
         rlt = {}
         rlt["filename"] = img_path
         rlt["faces"] = []
@@ -114,15 +122,20 @@ def main(argv):
                 img = cv2.imread(img_path)
         except:
             print('failed to load image: ' + img_path)
-            rlt["message"] = "failed to load"
-            result_list.append(rlt)
+            #rlt["message"] = "failed to load"
+            json_str = json.dumps(rlt, indent=2)
+            fp_rlt.write(json_str)
+            fp_rlt.flush()
             continue
 
         if img is None:
             print('failed to load image: ' + img_path)
 
             rlt["message"] = "failed to load"
-            result_list.append(rlt)
+            # result_list.append(rlt)
+            json_str = json.dumps(rlt, indent=2)
+            fp_rlt.write(json_str)
+            fp_rlt.flush()
             continue
 
         img_cnt += 1
@@ -182,7 +195,10 @@ def main(argv):
             rlt['faces'][i]['feat'] = feat_file
 
         rlt['message'] = 'success'
-        result_list.append(rlt)
+#        result_list.append(rlt)
+        json_str = json.dumps(rlt, indent=2)
+        fp_rlt.write(json_str)
+        fp_rlt.flush()
 
         if save_img or show_img:
             draw_faces(img, bboxes, points)
@@ -198,7 +214,8 @@ def main(argv):
             if ch == 27:
                 break
 
-    json.dump(result_list, fp_rlt, indent=4)
+    #json.dump(result_list, fp_rlt, indent=4)
+    fp_rlt.write('\n]\n')
     fp_rlt.close()
     fp.close()
 

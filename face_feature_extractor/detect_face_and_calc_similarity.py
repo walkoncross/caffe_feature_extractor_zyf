@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import os
 import sys
 import os.path as osp
@@ -311,7 +313,7 @@ def main(argv):
             img_path2, ctx_static, ctx_active)
 
         # result_list.append(rlt2)
-        json_str = json.dumps(rlt, indent=2)
+        json_str = json.dumps(rlt2, indent=2)
         fp_rlt.write(',\n' + json_str)
         fp_rlt.flush()
 
@@ -353,13 +355,15 @@ def main(argv):
 
 if __name__ == '__main__':
     argv = []
+    if len(sys.argv) < 2:
+        img_list = './list_img.txt'
 
-    img_list = './list_img.txt'
-
-    argv.append(img_list)
-#    argv.append('--no_detect')
-    argv.append('--no_align')
-#    argv.append('--show_image')
-#    argv.append('--save_image')
+        argv.append(img_list)
+    #    argv.append('--no_detect')
+        argv.append('--no_align')
+        argv.append('--show_image')
+        argv.append('--save_image')
+    else:
+        argv = sys.argv[1:]
 
     main(argv)
