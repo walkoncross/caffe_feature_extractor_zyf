@@ -729,11 +729,11 @@ def draw_faces(img, bboxes, points=None, draw_score=False):
         cv2.rectangle(img, (int(bbox[0]), int(bbox[1])), (int(
             bbox[2]), int(bbox[3])), (0, 255, 0), 1)
 
-        if draw_score:
+        if draw_score and len(bbox)>4:
             text = '%2.3f' % (bbox[4] * 100)
             cv2_put_text_to_image(img, text, int(bbox[0]), int(bbox[3]), 15)
 
-        if points is not None:
+        if points is not None and points[i] is not None:
             for j in range(5):
                 cv2.circle(img, (int(points[i][j]), int(
                     points[i][j + 5])), 2, (0, 0, 255), -1)
