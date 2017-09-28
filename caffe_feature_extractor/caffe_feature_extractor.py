@@ -13,6 +13,7 @@ import caffe
 
 from collections import OrderedDict
 
+
 class CaffeFeatureException(Exception):
     pass
 
@@ -33,8 +34,9 @@ class CaffeFeatureExtractor(object):
             'input_scale': 1.0,
             'raw_scale': 1.0,
             'channel_swap': (2, 1, 0),
-            'mirror_trick': 0,  # 0,None - will not use mirror_trick, 1 - eltavg (i.e.
-                                # eltsum()*0.5), 2 - eltmax
+            # 0,None - will not use mirror_trick, 1 - eltavg (i.e.
+            'mirror_trick': 0,
+            # eltsum()*0.5), 2 - eltmax
             'image_as_grey': False
         }
 
@@ -51,7 +53,8 @@ class CaffeFeatureExtractor(object):
         _config['network_prototxt'] = str(_config['network_prototxt'])
         _config['network_caffemodel'] = str(_config['network_caffemodel'])
         _config['data_mean'] = str(_config['data_mean'])
-        _config['channel_swap'] = tuple([int(i) for i in _config['channel_swap'].split(',') ])
+        _config['channel_swap'] = tuple(
+            [int(i) for i in _config['channel_swap'].split(',')])
 
         self.config.update(_config)
 
@@ -89,7 +92,8 @@ class CaffeFeatureExtractor(object):
         print 'original batch_size: ', self.batch_size
 
     def load_image(self, image_path):
-        img = caffe.io.load_image(image_path, color=not self.config['image_as_grey'])
+        img = caffe.io.load_image(
+            image_path, color=not self.config['image_as_grey'])
         if self.config['image_as_grey'] and img.shape[2] != 1:
             img = skimage.color.rgb2gray(img)
             img = img[:, :, np.newaxis]
@@ -222,9 +226,9 @@ class CaffeFeatureExtractor(object):
         if self.config['mirror_trick']:
             ftrs = blobs[layer_name][0:n_imgs * 2, ...]
             if self.config['mirror_trick'] == 2:
-                eltop_ftrs = np.maximum(ftrs[:n_imgs], ftrs[n_imgs:])
+                eltop_ftrs = np.maximum(ftrs[:n_imgs], ftrs[n_imgs:n_imgs * 2])
             else:
-                eltop_ftrs = (ftrs[:n_imgs] + ftrs[n_imgs:]) * 0.5
+                eltop_ftrs = (ftrs[:n_imgs] + ftrs[n_imgs:n_imgs * 2]) * 0.5
 
             features = eltop_ftrs
 
@@ -354,11 +358,11 @@ if __name__ == '__main__':
     if not osp.exists(save_dir):
         os.makedirs(save_dir)
 
-    ## init a feat_extractor
+    # init a feat_extractor
     print '\n===> init a feat_extractor'
     feat_extractor = CaffeFeatureExtractor(config_json)
 
-    ## test extract_features_for_image_list()
+    # test extract_features_for_image_list()
     save_name = 'img_list_features_eltavg.npy'
 
     img_list = load_image_list(image_dir, image_list_file)
@@ -368,10 +372,10 @@ if __name__ == '__main__':
     np.save(osp.join(save_dir, save_name), ftrs)
 
     for i in range(len(img_list)):
-        save_name = osp.splitext(osp.basename(img_list[i]))[0] + '_feat_eltavg.npy'
+        save_name = osp.splitext(osp.basename(img_list[i]))[0] + '_eltavg.npy'
         np.save(osp.join(save_dir, save_name), ftrs[i])
 
-    ## test extract_feature()
+    # test extract_feature()
     print '\n===> test extract_feature()'
     save_name_2 = 'single_feature_eltavg.npy'
     ftr = feat_extractor.extract_feature(img_list[0])
