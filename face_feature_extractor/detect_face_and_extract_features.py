@@ -23,10 +23,10 @@ def parse_arguments(argv):
                         default='./list_img.txt',
                         help='Path to image list file')
     parser.add_argument('--config', type=str,
-                        default='./config.json',
+                        default='./config_cv2.json',
                         help='Path to config file')
     parser.add_argument('--save_dir', type=str,
-                        default='./results',
+                        default='./feat_rlt',
                         help='Path to image list file')
     parser.add_argument('--image_root_dir', type=str,
                         default='',
@@ -34,7 +34,8 @@ def parse_arguments(argv):
     parser.add_argument('--no_detect', action='store_true',
                         help='do not detect faces if input images are cropped faces')
     parser.add_argument('--no_align', action='store_true',
-                        help='do not align faces if input images are pre-aligned faces, this option will set "--no_detect"')
+                        help='do not align faces if input images are cropped faces'
+                        ' and faces are aligned or do not need alignment')
     parser.add_argument('--show_image', action='store_true',
                         help='draw face rects and show images')
     parser.add_argument('--save_image', action='store_true',
@@ -76,9 +77,12 @@ def main(argv):
         detector = MtcnnDetector(mtcnn_model_path)
 
     if do_align:
-        aligner = FaceAligner(mtcnn_model_path)
+        if not do_detect:
+            aligner = FaceAligner(mtcnn_model_path)
+        else:
+            aligner = FaceAligner(None)
     else:
-        aligner = FaceAligner(None)
+        aligner = None
 
     feature_extractor = CaffeFeatureExtractor(extractor_config)
 
@@ -120,6 +124,7 @@ def main(argv):
                 img = cv2.imread(osp.join(args.image_root_dir, img_path))
             else:
                 img = cv2.imread(img_path)
+            print '\n---> img.shape: ', img.shape
         except:
             print('failed to load image: ' + img_path)
             #rlt["message"] = "failed to load"
@@ -149,7 +154,11 @@ def main(argv):
             print("detect_face() costs %f seconds" % (t2 - t1))
 
         else:
-            bboxes = None
+            print '---> Will not do detection because of option "--no_detect"'
+            shp = img.shape
+            rect = [0, 0, shp[1] - 1, shp[0] - 1, 1.0]
+            bboxes = [rect]
+            points = [None]
 
         n_faces = 0
         if bboxes is not None:
@@ -171,15 +180,22 @@ def main(argv):
 #        print('output points: ' + str(points))
         # toc()
 
-        print("\n===> Detect %d images, costs %f seconds, avg time: %f seconds" % (
-            img_cnt, ttl_det_time, ttl_det_time / img_cnt))
+        if do_detect:
+            print("\n===> Detect %d images, costs %f seconds, avg time: %f seconds" % (
+                img_cnt, ttl_det_time, ttl_det_time / img_cnt))
+
         print "---> %d faces detected" % n_faces
 
         if not n_faces:
             continue
 
         t1 = time.clock()
-        face_chips = aligner.get_face_chips(img, bboxes, points)
+        if do_align:
+            face_chips = aligner.get_face_chips(img, bboxes, points)
+        else:
+            print '---> Will not do alignment because of option "--no_align"'
+            face_chips = [img.astype(np.float)]
+
         features = feature_extractor.extract_features_batch(face_chips)
         t2 = time.clock()
         ttl_feat_time += t2 - t1
@@ -241,16 +257,18 @@ def main(argv):
 if __name__ == '__main__':
     argv = []
     if len(sys.argv) < 2:
-        img_list = './list_img_tianyan.txt'
-
+        #        img_list = './list_img_tianyan_10.txt'
+        #        img_list = r'C:\zyf\00_Ataraxia\facex\facex_cluster_test_imgs-wlc\face_chips_list.txt'
+        img_list = r'C:\zyf\github\mtcnn-caffe-good\face_aligner\face_chips\list_img.txt'
         argv.append(img_list)
-#        argv.append('--no_detect')
+        argv.append('--no_detect')
         argv.append('--no_align')
 #        argv.append('--show_image')
         argv.append('--save_image')
 
-        save_dir = './tianyan_test_pics'
-        argv.append('--save_dir='+save_dir)
+#        save_dir = './tianyan_test_pics_new'
+        save_dir = './fxcluster_test_chips'
+        argv.append('--save_dir=' + save_dir)
     else:
         argv = sys.argv[1:]
 

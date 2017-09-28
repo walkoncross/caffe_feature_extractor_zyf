@@ -25,7 +25,7 @@ def parse_arguments(argv):
                         default='./list_img.txt',
                         help='Path to image list file')
     parser.add_argument('--config', type=str,
-                        default='./config.json',
+                        default='./config_cv2.json',
                         help='Path to config file')
     parser.add_argument('--save_dir', type=str,
                         default='./results',
@@ -188,7 +188,7 @@ def detect_faces_and_extract_features(img_path, ctx_static, ctx_active):
 
         rlt['faces'][i]['feat'] = feat_file
         rlt['faces'][i]['face_chip'] = face_chip_fn
-        
+
     rlt['message'] = 'success'
 
     if save_img or show_img:

@@ -8,9 +8,9 @@
         "feature_layer": "fc5",
         "batch_size": 4,
         "input_scale": 0.0078125,
-        "raw_scale": 255.0,
-        "channel_swap": "2, 1, 0",
-        "mirror_trick": 1,
+        "raw_scale": 1.0,
+        "channel_swap": "0, 1, 2",
+        "mirror_trick": 0,
         "image_as_grey": 0
     }
 }
