@@ -345,31 +345,37 @@ if __name__ == '__main__':
 
         return image_fullpath_list
 
+    config_json = './extractor_config.json'
+    save_dir = 'feature_rlt'
+
+    image_dir = r'C:\zyf\github\mtcnn-caffe-good\face_aligner\face_chips'
+    image_list_file = r'C:\zyf\github\lfw-evaluation-zyf\extract_face_features\face_chips\face_chips_list_2.txt'
+
+    if not osp.exists(save_dir):
+        os.makedirs(save_dir)
+
     ## init a feat_extractor
     print '\n===> init a feat_extractor'
-    config_json = './extractor_config.json'
     feat_extractor = CaffeFeatureExtractor(config_json)
 
     ## test extract_features_for_image_list()
-    image_dir = r'C:\zyf\github\mtcnn-caffe-good\face_aligner\face_chips'
-    image_list_file = r'C:\zyf\github\lfw-evaluation-zyf\extract_face_features\face_chips\face_chips_list_2.txt'
     save_name = 'img_list_features_eltavg.npy'
 
     img_list = load_image_list(image_dir, image_list_file)
 
     print '\n===> test extract_features_for_image_list()'
     ftrs = feat_extractor.extract_features_for_image_list(img_list)
-    np.save(save_name, ftrs)
+    np.save(osp.join(save_dir, save_name), ftrs)
 
     for i in range(len(img_list)):
         save_name = osp.splitext(osp.basename(img_list[i]))[0] + '_feat_eltavg.npy'
-        np.save(save_name, ftrs[i])
+        np.save(osp.join(save_dir, save_name), ftrs[i])
 
     ## test extract_feature()
     print '\n===> test extract_feature()'
     save_name_2 = 'single_feature_eltavg.npy'
     ftr = feat_extractor.extract_feature(img_list[0])
-    np.save(save_name_2, ftr)
+    np.save(osp.join(save_dir, save_name_2), ftr)
 
     ft_diff = ftr - ftrs[0]
     print 'ft_diff: ', ft_diff.sum()
