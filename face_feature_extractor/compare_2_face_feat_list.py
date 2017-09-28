@@ -145,6 +145,31 @@ def calc_similarity(feat1, feat2):
     return sim
 
 
+def calc_similarity_L2(feat1, feat2):
+    diff_vec = feat1 - feat2
+    diff_vec_norm = norm(diff_vec)
+    print 'diff_vec_norm: ', diff_vec_norm
+
+    L2_sim = - np.dot(diff_vec, diff_vec)
+
+    return L2_sim
+
+
+def calc_similarity_norm_L2(feat1, feat2):
+    feat1_norm = norm(feat1)
+    feat2_norm = norm(feat2)
+    print 'feat1_norm: ', feat1_norm
+    print 'feat2_norm: ', feat2_norm
+
+    norm_diff_vec = feat1/feat1_norm - feat2/feat2_norm
+    norm_diff_vec_norm = norm(norm_diff_vec)
+    print 'norm_diff_vec_norm: ', norm_diff_vec_norm
+
+    L2_sim = - np.dot(norm_diff_vec, norm_diff_vec)
+
+    return L2_sim
+
+
 def main(argv):
     args = parse_arguments(argv)
     print '===> args:\n', args
@@ -201,6 +226,7 @@ def main(argv):
                 continue
 
             sim = calc_similarity(feat1, feat2)
+            #sim = calc_similarity_L2(feat1, feat2)
             print '===> similarity: ', sim
             fp_rlt.write("===> similarity: %5.4f\n\n" % sim)
 
@@ -227,8 +253,8 @@ if __name__ == '__main__':
         argv.append(feat_list1)
         argv.append(feat_list2)
 
-#        save_dir = './2_feat_list_compare_rlt'
-#        argv.append('--save_dir='+save_dir)
+        save_dir = './2_feat_list_compare_rlt_L2dist'
+        argv.append('--save_dir='+save_dir)
 
 #        root_dir1=''
 #        root_dir2=''

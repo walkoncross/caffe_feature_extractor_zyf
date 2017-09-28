@@ -21,10 +21,37 @@ def load_npy(npy_file):
 def calc_similarity(feat1, feat2):
     feat1_norm = norm(feat1)
     feat2_norm = norm(feat2)
+    print 'feat1_norm: ', feat1_norm
+    print 'feat2_norm: ', feat2_norm
 
     sim = np.dot(feat1, feat2) / (feat1_norm * feat2_norm)
 
     return sim
+
+
+def calc_similarity_L2(feat1, feat2):
+    diff_vec = feat1 - feat2
+    diff_vec_norm = norm(diff_vec)
+    print 'diff_vec_norm: ', diff_vec_norm
+
+    L2_sim = - np.dot(diff_vec, diff_vec)
+
+    return L2_sim
+
+
+def calc_similarity_norm_L2(feat1, feat2):
+    feat1_norm = norm(feat1)
+    feat2_norm = norm(feat2)
+    print 'feat1_norm: ', feat1_norm
+    print 'feat2_norm: ', feat2_norm
+
+    norm_diff_vec = feat1/feat1_norm - feat2/feat2_norm
+    norm_diff_vec_norm = norm(norm_diff_vec)
+    print 'norm_diff_vec_norm: ', norm_diff_vec_norm
+
+    L2_sim = - np.dot(norm_diff_vec, norm_diff_vec)
+
+    return L2_sim
 
 
 def compare_feats(file1, file2):
@@ -41,7 +68,16 @@ def compare_feats(file1, file2):
         return None
 
     sim = calc_similarity(ft1, ft2)
-    print '--->similarity: ', sim
+    print '--->cosine similarity: ', sim
+
+    L2_sim = calc_similarity_L2(ft1, ft2)
+    print '--->L2 similarity: ', L2_sim
+
+    L2_sim_norm = L2_sim / (norm(ft1) * norm(ft2))
+    print '--->L2_sim_norm: ', L2_sim_norm
+
+    norm_L2_sim = calc_similarity_norm_L2(ft1, ft2)
+    print '--->norm_L2_sim: ', norm_L2_sim
 
     return sim
 
