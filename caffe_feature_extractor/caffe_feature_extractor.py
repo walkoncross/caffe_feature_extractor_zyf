@@ -33,7 +33,7 @@ class CaffeFeatureExtractor(object):
             'batch_size': 1,
             'input_scale': 1.0,
             'raw_scale': 1.0,
-            'channel_swap': (2, 1, 0),
+            'channel_swap': (2, 1, 0), # BGR, be careful your input image's channel
             # 0,None - will not use mirror_trick, 1 - eltavg (i.e.
             'mirror_trick': 0,
             # eltsum()*0.5), 2 - eltmax
@@ -77,6 +77,9 @@ class CaffeFeatureExtractor(object):
 
         self.blobs = OrderedDict([(k, v.data)
                                   for k, v in self.net.blobs.items()])
+#        print 'self.blobs: ', self.blobs
+#        for k, v in self.net.blobs.items():
+#            print k, v
 
         self.input_shape = self.blobs['data'].shape
         self.batch_size = self.input_shape[0]
@@ -128,7 +131,8 @@ class CaffeFeatureExtractor(object):
             t2 = time.clock()
             time_predict += (t2 - t1)
         else:
-            img = image
+            img = image.astype(np.float32) # data type must be float32
+
         print 'image shape: ', img.shape
 
         img_batch.append(img)
@@ -152,6 +156,7 @@ class CaffeFeatureExtractor(object):
         # syncs the memory between GPU and CPU
         blobs = OrderedDict([(k, v.data)
                              for k, v in self.net.blobs.items()])
+#        print 'blobs: ', blobs
 
         if self.config['mirror_trick']:
             ftrs = blobs[layer_name][0:n_imgs * 2, ...]
@@ -198,7 +203,8 @@ class CaffeFeatureExtractor(object):
         features = np.empty(features_shape, dtype='float32', order='C')
         print 'output features shape: ', features_shape
 
-        img_batch = images
+         # data type must be float32
+        img_batch = [im.astype(np.float32) for im in images]
 
         cnt_predict = 0
         time_predict = 0.0
@@ -222,6 +228,7 @@ class CaffeFeatureExtractor(object):
         # syncs the memory between GPU and CPU
         blobs = OrderedDict([(k, v.data)
                              for k, v in self.net.blobs.items()])
+#        print 'blobs: ', blobs
 
         if self.config['mirror_trick']:
             ftrs = blobs[layer_name][0:n_imgs * 2, ...]
@@ -230,11 +237,11 @@ class CaffeFeatureExtractor(object):
             else:
                 eltop_ftrs = (ftrs[:n_imgs] + ftrs[n_imgs:n_imgs * 2]) * 0.5
 
-            features = eltop_ftrs
+            features = eltop_ftrs.copy()
 
         else:
             ftrs = blobs[layer_name][0:n_imgs, ...]
-            features = ftrs
+            features = ftrs.copy()  # copy() is a must-have
 
         print('Predict %d images, cost %f seconds, average time: %f seconds' %
               (cnt_predict, time_predict, time_predict / cnt_predict))
