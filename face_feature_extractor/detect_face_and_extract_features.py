@@ -191,7 +191,13 @@ def main(argv):
 
         t1 = time.clock()
         if do_align:
-            face_chips = aligner.get_face_chips(img, bboxes, points)
+            if points is None or points[0] is None:
+                face_chips = aligner.get_face_chips(img, bboxes, None)
+            else:
+                face_chips = aligner.get_face_chips(img, bboxes, points)
+#            face_chips = aligner.get_face_chips(img, bboxes, None)
+
+#            face_chips = [im.astype(np.float) for im in face_chips_ubyte]
         else:
             print '---> Will not do alignment because of option "--no_align"'
             face_chips = [img.astype(np.float)]
@@ -257,17 +263,21 @@ def main(argv):
 if __name__ == '__main__':
     argv = []
     if len(sys.argv) < 2:
-        #        img_list = './list_img_tianyan_10.txt'
+        #        img_list = './list_img_tianyan.txt'
+        #        img_list = './list_img_qiniu-staff.txt'
+        img_list = './list_img_renlianku-20.txt'
         #        img_list = r'C:\zyf\00_Ataraxia\facex\facex_cluster_test_imgs-wlc\face_chips_list.txt'
-        img_list = r'C:\zyf\github\mtcnn-caffe-good\face_aligner\face_chips\list_img.txt'
+#        img_list = r'C:\zyf\github\mtcnn-caffe-good\face_aligner\face_chips\list_img.txt'
+#        save_dir = './tianyan_test_pics_new_fixbug_eltavg'
+#        save_dir = './renlianku_qiniu_staff_fixbug_eltavg'
+        save_dir = './renlianku_20_fixbug_eltavg'
+#        save_dir = './fxcluster_test_chips_fixbug_noflip_align'
+
         argv.append(img_list)
-        argv.append('--no_detect')
-        argv.append('--no_align')
+#        argv.append('--no_detect')
+#        argv.append('--no_align')
 #        argv.append('--show_image')
         argv.append('--save_image')
-
-#        save_dir = './tianyan_test_pics_new'
-        save_dir = './fxcluster_test_chips'
         argv.append('--save_dir=' + save_dir)
     else:
         argv = sys.argv[1:]

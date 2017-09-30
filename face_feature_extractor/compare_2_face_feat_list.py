@@ -161,7 +161,7 @@ def calc_similarity_norm_L2(feat1, feat2):
     print 'feat1_norm: ', feat1_norm
     print 'feat2_norm: ', feat2_norm
 
-    norm_diff_vec = feat1/feat1_norm - feat2/feat2_norm
+    norm_diff_vec = feat1 / feat1_norm - feat2 / feat2_norm
     norm_diff_vec_norm = norm(norm_diff_vec)
     print 'norm_diff_vec_norm: ', norm_diff_vec_norm
 
@@ -244,17 +244,18 @@ def main(argv):
 
     fp_rlt.close()
 
+
 if __name__ == '__main__':
     argv = []
     if len(sys.argv) < 2:
-        feat_list1 = './list_npy_renlianku_20.txt'
-        feat_list2 = './list_npy_qiniu_staff.txt'
+        feat_list1 = './list_npy_renlianku_20_fixbug.txt'
+        feat_list2 = './list_npy_qiniu_staff_fixbug.txt'
 
         argv.append(feat_list1)
         argv.append(feat_list2)
 
-        save_dir = './2_feat_list_compare_rlt_L2dist'
-        argv.append('--save_dir='+save_dir)
+        save_dir = './2_feat_list_compare_rlt_fixbug_eltavg'
+        argv.append('--save_dir=' + save_dir)
 
 #        root_dir1=''
 #        root_dir2=''

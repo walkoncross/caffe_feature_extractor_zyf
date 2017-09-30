@@ -74,7 +74,7 @@ def detect_faces_and_extract_features(img_path, ctx_static, ctx_active):
     aligner = ctx_static['aligner']
     feature_extractor = ctx_static['feature_extractor']
     do_detect = ctx_static['do_detect']
-#    do_align = ctx_static['do_align']
+    do_align = ctx_static['do_align']
     save_img = ctx_static['save_img']
     show_img = ctx_static['show_img']
     save_dir = ctx_static['save_dir']
@@ -126,7 +126,11 @@ def detect_faces_and_extract_features(img_path, ctx_static, ctx_active):
         print("detect_face() costs %f seconds" % (t2 - t1))
 
     else:
-        bboxes = None
+        print '---> Will not do detection because of option "--no_detect"'
+        shp = img.shape
+        rect = [0, 0, shp[1] - 1, shp[0] - 1, 1.0]
+        bboxes = [rect]
+        points = [None]
 
     if bboxes is not None and len(bboxes) > 0:
         for (box, pts) in zip(bboxes, points):
@@ -157,7 +161,21 @@ def detect_faces_and_extract_features(img_path, ctx_static, ctx_active):
         points = points[:max_faces]
 
     t1 = time.clock()
-    face_chips = aligner.get_face_chips(img, bboxes, points)
+    if do_align:
+        if points is None or points[0] is None:
+            face_chips = aligner.get_face_chips(img, bboxes, None)
+        else:
+            face_chips = aligner.get_face_chips(img, bboxes, points)
+#        face_chips_ubyte = aligner.get_face_chips(img, bboxes, None)
+
+#        face_chips = [im.astype(np.float) for im in face_chips_ubyte]
+    else:
+        print '---> Will not do alignment because of option "--no_align"'
+#        face_chips = [img.astype(np.float)]
+        face_chips = [img]
+
+#    face_chips = aligner.get_face_chips(img, bboxes, points)
+#    imgs = [chip.astype(np.float) for chip in face_chips]
     features = feature_extractor.extract_features_batch(face_chips)
     t2 = time.clock()
     ttl_feat_time += t2 - t1
@@ -259,9 +277,12 @@ def main(argv):
         detector = MtcnnDetector(mtcnn_model_path)
 
     if do_align:
-        aligner = FaceAligner(mtcnn_model_path)
+        if not do_detect:
+            aligner = FaceAligner(mtcnn_model_path)
+        else:
+            aligner = FaceAligner(None)
     else:
-        aligner = FaceAligner(None)
+        aligner = None
 
     feature_extractor = CaffeFeatureExtractor(extractor_config)
 
@@ -297,13 +318,17 @@ def main(argv):
 
     while True:
         line = fp.readline().strip()
+        print '---> line: ', line
         if not line:
             break
 
         img_path = get_image_path(line, args.image_root_dir)
+        print '---> img_path: ', img_path
 
-        rlt, features, face_chips = detect_faces_and_extract_features(
+        (rlt, features, face_chips) = detect_faces_and_extract_features(
             img_path, ctx_static, ctx_active)
+#        print 'features: ', features
+#        print 'id(features): ', id(features)
 
         # result_list.append(rlt)
         if write_comma_flag:
@@ -316,13 +341,23 @@ def main(argv):
         fp_rlt.flush()
 
         line = fp.readline().strip()
+        print '---> line: ', line
         if not line:
             break
 
         img_path2 = get_image_path(line, args.image_root_dir)
+        print '---> img_path2: ', img_path2
 
-        rlt2, features2, face_chips2 = detect_faces_and_extract_features(
+        (rlt2, features2, face_chips2) = detect_faces_and_extract_features(
             img_path2, ctx_static, ctx_active)
+#        print 'features2: ', features2
+#        print 'features: ', features
+#
+#        print 'id(features): ', id(features)
+#        print 'id(features2): ', id(features2)
+#
+#        print 'features.data: ', id(features.data)
+#        print 'features2.data: ', id(features2.data)
 
         # result_list.append(rlt2)
         json_str = json.dumps(rlt2, indent=2)
@@ -341,6 +376,8 @@ def main(argv):
             for j in range(rlt['face_count']):
                 for i in range(rlt2['face_count']):
                     sim = calc_similarity(features[j], features2[i])
+                    print 'features[%d]: ' % j, features[j]
+                    print 'features2[%d]: ' % i, features2[i]
 
                     img_pair = np.hstack((face_chips[j], face_chips2[i]))
 
@@ -368,12 +405,12 @@ def main(argv):
 if __name__ == '__main__':
     argv = []
     if len(sys.argv) < 2:
-        img_list = './list_img.txt'
+        img_list = './list_img_tianyan.txt'
 
         argv.append(img_list)
     #    argv.append('--no_detect')
-        argv.append('--no_align')
-        argv.append('--show_image')
+#        argv.append('--no_align')
+#        argv.append('--show_image')
         argv.append('--save_image')
     else:
         argv = sys.argv[1:]
