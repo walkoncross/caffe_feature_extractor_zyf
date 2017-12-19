@@ -4,6 +4,7 @@ import os
 import os.path as osp
 
 import numpy as np
+from numpy.linalg import norm
 # import scipy.io as sio
 import skimage
 
@@ -33,11 +34,13 @@ class CaffeFeatureExtractor(object):
             'batch_size': 1,
             'input_scale': 1.0,
             'raw_scale': 1.0,
-            'channel_swap': (2, 1, 0), # BGR, be careful your input image's channel
+            # BGR, be careful your input image's channel
+            'channel_swap': (2, 1, 0),
             # 0,None - will not use mirror_trick, 1 - eltavg (i.e.
             'mirror_trick': 0,
             # eltsum()*0.5), 2 - eltmax
-            'image_as_grey': False
+            'image_as_grey': False,
+            'normalize_output': False
         }
 
         if isinstance(config_json, str):
@@ -131,7 +134,7 @@ class CaffeFeatureExtractor(object):
             t2 = time.clock()
             time_predict += (t2 - t1)
         else:
-            img = image.astype(np.float32) # data type must be float32
+            img = image.astype(np.float32)  # data type must be float32
 
         print 'image shape: ', img.shape
 
@@ -179,6 +182,10 @@ class CaffeFeatureExtractor(object):
 
         feature = np.asarray(feature, dtype='float32')
 
+        if self.config['normalize_output']:
+            feat_norm = norm(feature)
+            feature /= feat_norm
+
         return feature
 
     def extract_features_batch(self, images, layer_name=None):
@@ -203,7 +210,7 @@ class CaffeFeatureExtractor(object):
         features = np.empty(features_shape, dtype='float32', order='C')
         print 'output features shape: ', features_shape
 
-         # data type must be float32
+        # data type must be float32
         img_batch = [im.astype(np.float32) for im in images]
 
         cnt_predict = 0
@@ -247,6 +254,9 @@ class CaffeFeatureExtractor(object):
               (cnt_predict, time_predict, time_predict / cnt_predict))
 
         features = np.asarray(features, dtype='float32')
+        if self.config['normalize_output']:
+            feat_norm = norm(features, axis=1)
+            features = features / np.reshape(feat_norm, [-1, 1])
 
         return features
 
@@ -335,6 +345,9 @@ class CaffeFeatureExtractor(object):
 #              (cnt_predict, time_predict, time_predict / cnt_predict))
 
         features = np.asarray(features, dtype='float32')
+        if self.config['normalize_output']:
+            feat_norm = norm(features, axis=1)
+            features = features / np.reshape(feat_norm, [-1, 1])
 
         return features
 
@@ -356,8 +369,8 @@ if __name__ == '__main__':
 
         return image_fullpath_list
 
-    config_json = './extractor_config.json'
-    save_dir = 'feature_rlt'
+    config_json = './extractor_config_sphere64.json'
+    save_dir = 'feature_rlt_sphere64_noflip'
 
     image_dir = r'C:\zyf\github\mtcnn-caffe-good\face_aligner\face_chips'
     image_list_file = r'C:\zyf\github\lfw-evaluation-zyf\extract_face_features\face_chips\face_chips_list_2.txt'
@@ -370,7 +383,7 @@ if __name__ == '__main__':
     feat_extractor = CaffeFeatureExtractor(config_json)
 
     # test extract_features_for_image_list()
-    save_name = 'img_list_features_eltavg.npy'
+    save_name = 'img_list_features.npy'
 
     img_list = load_image_list(image_dir, image_list_file)
 
@@ -379,12 +392,12 @@ if __name__ == '__main__':
     np.save(osp.join(save_dir, save_name), ftrs)
 
     for i in range(len(img_list)):
-        save_name = osp.splitext(osp.basename(img_list[i]))[0] + '_eltavg.npy'
+        save_name = osp.splitext(osp.basename(img_list[i]))[0] + '.npy'
         np.save(osp.join(save_dir, save_name), ftrs[i])
 
     # test extract_feature()
     print '\n===> test extract_feature()'
-    save_name_2 = 'single_feature_eltavg.npy'
+    save_name_2 = 'single_feature.npy'
     ftr = feat_extractor.extract_feature(img_list[0])
     np.save(osp.join(save_dir, save_name_2), ftr)
 
