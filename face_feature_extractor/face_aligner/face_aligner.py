@@ -11,27 +11,25 @@ from mtcnn_aligner import MtcnnAligner
 from fx_warp_and_crop_face import warp_and_crop_face
 
 
-class FaceAligner:
-    def __init__(self, caffe_model_path=None):
-        self.aligner = None
-        if caffe_model_path:
-            self.aligner = MtcnnAligner(caffe_model_path)           
-
-    def align_face(self, img, face_rects):
+class FaceAligner(MtcnnAligner):
+#    def __init__(self, caffe_model_path):
+#        self.aligner = MtcnnAligner(caffe_model_path)
+#
+#    def align_face(self, img, face_rects):
+#        if isinstance(img, str):
+#            img = cv2.imread(img)
+#
+#        regressed_rects, facial_points = self.aligner.align_face(
+#            img, face_rects)
+#
+#        return (regressed_rects, facial_points)
+#
+    def get_face_chips(self, img, face_rects, facial_points=None):
         if isinstance(img, str):
             img = cv2.imread(img)
 
-        regressed_rects, facial_points = self.aligner.align_face(
-            img, face_rects)
-
-        return (regressed_rects, facial_points)
-
-    def get_face_chips(self, img, face_rects, facial_points=None):
         if facial_points is None:
-            if self.aligner is None:
-                raise Exception('FaceAligner.aligner is not initialized')
-
-            rects, facial_points = self.aligner.align_face(
+            rects, facial_points = self.align_face(
                 img, face_rects)
 
         reference_5pts = None
@@ -97,8 +95,13 @@ if __name__ == "__main__":
     aligner = FaceAligner(caffe_model_path)
 
     t1 = time.clock()
+
+    # You can align the faces in two steps like this:
 #    bboxes, points = aligner.align_face(img, face_rects)
 #    face_chips = aligner.get_face_chips(img, bboxes, points)
+
+    # OR just align them in one step by calling the following function,
+    # which combine last two functions
     face_chips = aligner.get_face_chips(img, face_rects)
     t2 = time.clock()
 
