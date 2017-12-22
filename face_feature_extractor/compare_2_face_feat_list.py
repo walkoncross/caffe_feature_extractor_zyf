@@ -11,9 +11,7 @@ import time
 import argparse
 import init_paths
 
-from face_aligner.face_aligner import FaceAligner
-from face_detector.mtcnn_detector import MtcnnDetector, draw_faces, cv2_put_text_to_image
-from caffe_feature_extractor import CaffeFeatureExtractor
+from face_detector.mtcnn_detector import draw_faces, cv2_put_text_to_image
 
 from numpy.linalg import norm
 
