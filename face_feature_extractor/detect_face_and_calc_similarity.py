@@ -11,8 +11,8 @@ import time
 import argparse
 import init_paths
 
-from face_aligner.face_aligner import FaceAligner
-from face_detector.mtcnn_detector import MtcnnDetector, draw_faces, cv2_put_text_to_image
+from face_aligner import FaceAligner
+from face_detector import MtcnnDetector, draw_faces, cv2_put_text_to_image
 from caffe_feature_extractor import CaffeFeatureExtractor
 
 from numpy.linalg import norm
@@ -405,7 +405,7 @@ def main(argv):
 if __name__ == '__main__':
     argv = []
     if len(sys.argv) < 2:
-        img_list = './list_img_tianyan.txt'
+        img_list = './list_img_tianyan_10.txt'
 
         argv.append(img_list)
     #    argv.append('--no_detect')

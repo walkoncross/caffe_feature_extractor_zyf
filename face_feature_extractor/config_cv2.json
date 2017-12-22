@@ -1,5 +1,5 @@
 {
-    "mtcnn_model_dir": "C:/zyf/github/mtcnn-caffe-good/model",
+    "mtcnn_model_dir": "C:/zyf/github/mtcnn-caffe-good-new/model",
     "max_faces": 4,
     "face_feature": {
         "network_prototxt": "C:/zyf/dnn_models/face_models/centerloss/center_face_deploy_bs8.prototxt",

@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import os
 import sys
@@ -11,8 +12,8 @@ import time
 import argparse
 import init_paths
 
-from face_aligner.face_aligner import FaceAligner
-from face_detector.mtcnn_detector import MtcnnDetector, draw_faces
+from face_aligner import FaceAligner
+from face_detector import MtcnnDetector, draw_faces
 from caffe_feature_extractor import CaffeFeatureExtractor
 
 
@@ -265,19 +266,19 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         #        img_list = './list_img_tianyan.txt'
         #        img_list = './list_img_qiniu-staff.txt'
-        img_list = './list_img_renlianku-20.txt'
+        img_list = './list_img_renlianku.txt'
         #        img_list = r'C:\zyf\00_Ataraxia\facex\facex_cluster_test_imgs-wlc\face_chips_list.txt'
 #        img_list = r'C:\zyf\github\mtcnn-caffe-good\face_aligner\face_chips\list_img.txt'
 #        save_dir = './tianyan_test_pics_new_fixbug_eltavg'
 #        save_dir = './renlianku_qiniu_staff_fixbug_eltavg'
-        save_dir = './renlianku_20_fixbug_eltavg'
+        save_dir = './renlianku_fixbug_eltavg'
 #        save_dir = './fxcluster_test_chips_fixbug_noflip_align'
 
         argv.append(img_list)
 #        argv.append('--no_detect')
 #        argv.append('--no_align')
 #        argv.append('--show_image')
-        argv.append('--save_image')
+#        argv.append('--save_image')
         argv.append('--save_dir=' + save_dir)
     else:
         argv = sys.argv[1:]
