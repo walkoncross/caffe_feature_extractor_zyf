@@ -205,8 +205,8 @@ class CaffeFeatureExtractor(object):
             feature = eltop_ftrs[0]
 
         else:
-#            ftrs = blobs[layer_name][0, ...]
-            ftrs = feat_blob_data[0, ...]
+#            ftrs = blobs[layer_name][0:n_imgs, ...]
+            ftrs = feat_blob_data[0:n_imgs, ...]
             feature = ftrs.copy()  # copy() is a must-have
 
         if cnt_load_img:
@@ -286,7 +286,7 @@ class CaffeFeatureExtractor(object):
 
         else:
 #            ftrs = blobs[layer_name][0:n_imgs, ...]
-            ftrs = feat_blob_data[0, ...]
+            ftrs = feat_blob_data[0:n_imgs, ...]
             features = ftrs.copy()  # copy() is a must-have
 
         print('Predict %d images, cost %f seconds, average time: %f seconds' %
