@@ -164,11 +164,14 @@ class CaffeFeatureExtractor(object):
 
         # reshape net into final_batch_size
         if self.input_shape[0] != final_batch_size:
-            print '---> reshape net input batch size from %d to %d' % (self.input_shape[0], final_batch_size)
-            self.net.blobs['data'].reshape(
-                final_batch_size, self.input_shape[1], self.input_shape[2], self.input_shape[3])
-            print '---> reshape the net blobs'
-            self.net.reshape()
+            try:
+                print '---> reshape net input batch size from %d to %d' % (self.input_shape[0], final_batch_size)
+                self.net.blobs['data'].reshape(
+                    final_batch_size, self.input_shape[1], self.input_shape[2], self.input_shape[3])
+                print '---> reshape the net blobs'
+                self.net.reshape()
+            except Exception as err:
+                raise InitError('Exception when reshaping net: ' + str(err))
 
             self.input_shape=self.net.blobs['data'].data.shape
 
@@ -209,6 +212,9 @@ class CaffeFeatureExtractor(object):
             raise FeatureLayerError('Invalid feature layer name: '
                                         + layer_name)
             return None
+
+    def get_batch_size(self):
+        return self.batch_size
 
     def extract_feature(self, image, layer_name=None):
         layer_name = self.get_feature_layer_name(layer_name)

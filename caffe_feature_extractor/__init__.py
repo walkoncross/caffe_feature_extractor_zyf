@@ -1,1 +1,1 @@
-from caffe_feature_extractor import CaffeFeatureExtractor
+from .caffe_feature_extractor import CaffeFeatureExtractor
