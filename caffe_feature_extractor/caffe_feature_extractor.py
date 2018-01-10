@@ -465,7 +465,7 @@ if __name__ == '__main__':
 
         return img_fn_list
 
-    config_json = './extractor_config_sphere64.json'
+    config_json = './extractor_config.json'
     save_dir = 'feature_rlt_sphere64_noflip'
 
     image_dir = r'C:\zyf\github\mtcnn-caffe-good-new\face_aligner\face_chips'
