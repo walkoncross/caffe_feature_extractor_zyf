@@ -14,22 +14,38 @@ import json
 import time
 import caffe
 
-from collections import OrderedDict
+# from caffe import Classifier
+from classifier import Classifier
 
-from caffe.proto import caffe_pb2
-from caffe.io import blobproto_to_array
+# from collections import OrderedDict
 
 
 def load_binaryproto(bp_file):
-    blob_proto = caffe_pb2.BlobProto()
+    blob_proto = caffe.proto.caffe_pb2.BlobProto()
     data = open(bp_file, 'rb').read()
     blob_proto.ParseFromString(data)
-    arr = blobproto_to_array(blob_proto)
+    arr = caffe.io.blobproto_to_array(blob_proto)
 #    print type(arr)
     return arr
 
 
-class CaffeFeatureException(Exception):
+class Error(Exception):
+    """Base class for exceptions in this module."""
+    pass
+
+
+class InitError(Error):
+    """ Class for Init exceptions in this module."""
+    pass
+
+
+class FeatureLayerError(Error):
+    """Exception for Invalid feature layer name."""
+    pass
+
+
+class ExtractionError(Error):
+    """Exception from extract_xxx()."""
     pass
 
 
@@ -54,7 +70,9 @@ class CaffeFeatureExtractor(object):
             # eltsum()*0.5), 2 - eltmax
             'mirror_trick': 0,
             'image_as_grey': False,
-            'normalize_output': False
+            'normalize_output': False,
+            'cpu_only': 0,
+            'gpu_id': 0
         }
 
         if isinstance(config_json, str):
@@ -79,27 +97,49 @@ class CaffeFeatureExtractor(object):
 
         mean_arr = None
         if (self.config['data_mean']):
-            if self.config['data_mean'].endswith('.npy'):
-                mean_arr = np.load(self.config['data_mean'])
-            elif self.config['data_mean'].endswith('.binaryproto'):
-                mean_arr = load_binaryproto(self.config['data_mean'])
-            else:
-                mean_arr = np.matrix(self.config['data_mean']).A1
-            print 'mean array shape: ', mean_arr.shape
-            print 'mean array: \n', mean_arr
+            try:
+                if self.config['data_mean'].endswith('.npy'):
+                    mean_arr = np.load(self.config['data_mean'])
+                elif self.config['data_mean'].endswith('.binaryproto'):
+                    mean_arr = load_binaryproto(self.config['data_mean'])
+                else:
+                    mean_arr = np.matrix(self.config['data_mean']).A1
+                # print 'mean array shape: ', mean_arr.shape
+                # print 'mean array: \n', mean_arr
+            except:
+                raise InitError('Failed to load "data_mean": ' +
+                                str(self.config['data_mean']))
+
+        if (int(self.config['mirror_trick']) not in [0, 1, 2]):
+            raise InitError('"mirror_trick" must be one from [0,1,2]')
 
         print '\n===> CaffeFeatureExtractor.config: \n', self.config
 
-        caffe.set_mode_gpu()
+        try:
+            if(self.config['cpu_only']):
+                caffe.set_mode_cpu()
+            else:
+                caffe.set_mode_gpu()
+                caffe.set_device(int(self.config['gpu_id']))
+        except Exception as err:
+            raise InitError(
+                'Exception from caffe.set_mode_xxx() or caffe.set_device(): ' + str(err))
 
-        self.net = caffe.Classifier(self.config['network_prototxt'],
-                                    self.config['network_caffemodel'],
-                                    None,
-                                    mean_arr,
-                                    self.config['input_scale'],
-                                    self.config['raw_scale'],
-                                    self.config['channel_swap']
-                                    )
+        try:
+            self.net=Classifier(self.config['network_prototxt'],
+                                        self.config['network_caffemodel'],
+                                        None,
+                                        mean_arr,
+                                        self.config['input_scale'],
+                                        self.config['raw_scale'],
+                                        self.config['channel_swap']
+                                        )
+        except Exception as err:
+            raise InitError('Exception from Clssifier.__init__(): ' + str(err))
+
+        if (self.config['feature_layer'] not in self.net.layer_dict.keys()):
+            raise FeatureLayerError('Invalid feature layer name: '
+                                        + self.config['feature_layer'])
 
 #        self.net_blobs = OrderedDict([(k, v.data)
 #                                  for k, v in self.net.blobs.items()])
@@ -107,29 +147,30 @@ class CaffeFeatureExtractor(object):
 #        for k, v in self.net.blobs.items():
 #            print k, v
 
-        self.input_shape = self.net.blobs['data'].data.shape
+        self.input_shape=self.net.blobs['data'].data.shape
         print '---> original input data shape (in prototxt): ', self.input_shape
         print '---> original batch_size (in prototxt): ', self.input_shape[0]
 
-        self.batch_size = self.config['batch_size']
+        self.batch_size=self.config['batch_size']
         print '---> batch size in the config: ', self.batch_size
 
         if self.config['mirror_trick'] > 0:
             print '---> need to double the batch size of the net input data because of mirror_trick'
-            final_batch_size = self.batch_size * 2
+            final_batch_size=self.batch_size * 2
         else:
-            final_batch_size = self.batch_size
+            final_batch_size=self.batch_size
 
         print '---> will use a batch size: ', final_batch_size
 
         # reshape net into final_batch_size
         if self.input_shape[0] != final_batch_size:
             print '---> reshape net input batch size from %d to %d' % (self.input_shape[0], final_batch_size)
-            self.net.blobs['data'].reshape(final_batch_size, self.input_shape[1], self.input_shape[2], self.input_shape[3])
+            self.net.blobs['data'].reshape(
+                final_batch_size, self.input_shape[1], self.input_shape[2], self.input_shape[3])
             print '---> reshape the net blobs'
             self.net.reshape()
 
-            self.input_shape = self.net.blobs['data'].data.shape
+            self.input_shape=self.net.blobs['data'].data.shape
 
             print '---> after reshape, net input data shape: ', self.input_shape
 
@@ -137,19 +178,17 @@ class CaffeFeatureExtractor(object):
 
 #        if self.config['mirror_trick'] > 0:
 #            if self.batch_size < 2:
-#                raise CaffeFeatureException('CaffeFeatureExtractor Exception:'
-#                                            ' If using mirror_trick, batch_size of input "data" layer must > 1')
+#                raise InitError('If using mirror_trick, batch_size of input "data" layer must > 1')
 #
 #            self.batch_size /= 2
-#            print 'halve the batch_size for mirror_trick eval: batch_size=', self.batch_size
-
+# print 'halve the batch_size for mirror_trick eval: batch_size=',
+# self.batch_size
 
     def __delete__(self):
         print 'delete CaffeFeatureExtractor object'
 
-
     def load_image(self, image_path):
-        img = caffe.io.load_image(
+        img=caffe.io.load_image(
             image_path, color=not self.config['image_as_grey'])
         if self.config['image_as_grey'] and img.shape[2] != 1:
             img = skimage.color.rgb2gray(img)
@@ -160,13 +199,19 @@ class CaffeFeatureExtractor(object):
     def load_images(self, image_path):
         pass
 
-    def extract_feature(self, image, layer_name=None):
+    def get_feature_layer_name(self, layer_name=None):
         if not layer_name:
-            layer_name = self.config['feature_layer']
+            return self.config['feature_layer']
 
-        if not layer_name:
-            raise CaffeFeatureException('CaffeFeatureExtractor Exception:'
-                                        ' Invalid layer_name')
+        if (layer_name in self.net.layer_dict.keys()):
+            return layer_name
+        else:
+            raise FeatureLayerError('Invalid feature layer name: '
+                                        + layer_name)
+            return None
+
+    def extract_feature(self, image, layer_name=None):
+        layer_name = self.get_feature_layer_name(layer_name)
 
         feat_shp = self.net.blobs[layer_name].shape
         print 'feature layer shape: ', feat_shp
@@ -214,7 +259,7 @@ class CaffeFeatureExtractor(object):
         feat_blob_data = self.net.blobs[layer_name].data
 
         if self.config['mirror_trick']:
-#            ftrs = blobs[layer_name][0:n_imgs * 2, ...]
+            #            ftrs = blobs[layer_name][0:n_imgs * 2, ...]
             ftrs = feat_blob_data[0:n_imgs * 2, ...]
             if self.config['mirror_trick'] == 2:
                 eltop_ftrs = np.maximum(ftrs[:n_imgs], ftrs[n_imgs:])
@@ -224,7 +269,7 @@ class CaffeFeatureExtractor(object):
             feature = eltop_ftrs[0]
 
         else:
-#            ftrs = blobs[layer_name][0:n_imgs, ...]
+            #            ftrs = blobs[layer_name][0:n_imgs, ...]
             ftrs = feat_blob_data[0:n_imgs, ...]
             feature = ftrs.copy()  # copy() is a must-have
 
@@ -244,19 +289,13 @@ class CaffeFeatureExtractor(object):
         return feature
 
     def extract_features_batch(self, images, layer_name=None):
-        if not layer_name:
-            layer_name = self.config['feature_layer']
-
-        if not layer_name:
-            raise CaffeFeatureException('CaffeFeatureExtractor Exception:'
-                                        ' Invalid layer_name')
+        layer_name = self.get_feature_layer_name(layer_name)
 
         n_imgs = len(images)
 
         if (n_imgs > self.batch_size
                 or (self.config['mirror_trick'] and n_imgs / 2 > self.batch_size)):
-            raise CaffeFeatureException('CaffeFeatureExtractor Exception:'
-                                        ' Number of input images > batch_size set in prototxt')
+            raise ExtractionError('Number of input images > batch_size set in prototxt')
 
         feat_shp = self.net.blobs[layer_name].data.shape
         print 'feature layer shape: ', feat_shp
@@ -294,7 +333,7 @@ class CaffeFeatureExtractor(object):
         feat_blob_data = self.net.blobs[layer_name].data
 
         if self.config['mirror_trick']:
-#            ftrs = blobs[layer_name][0:n_imgs * 2, ...]
+            #            ftrs = blobs[layer_name][0:n_imgs * 2, ...]
             ftrs = feat_blob_data[0:n_imgs * 2, ...]
             if self.config['mirror_trick'] == 2:
                 eltop_ftrs = np.maximum(ftrs[:n_imgs], ftrs[n_imgs:n_imgs * 2])
@@ -304,7 +343,7 @@ class CaffeFeatureExtractor(object):
             features = eltop_ftrs.copy()
 
         else:
-#            ftrs = blobs[layer_name][0:n_imgs, ...]
+            #            ftrs = blobs[layer_name][0:n_imgs, ...]
             ftrs = feat_blob_data[0:n_imgs, ...]
             features = ftrs.copy()  # copy() is a must-have
 
@@ -319,12 +358,7 @@ class CaffeFeatureExtractor(object):
         return features
 
     def extract_features_for_image_list(self, image_list, img_root_dir=None, layer_name=None):
-        if not layer_name:
-            layer_name = self.config['feature_layer']
-
-        if not layer_name:
-            raise CaffeFeatureException('CaffeFeatureExtractor Exception:'
-                                        ' Invalid layer_name')
+        layer_name = self.get_feature_layer_name(layer_name)
 
         feat_shp = self.net.blobs[layer_name].data.shape
         print 'feature layer shape: ', feat_shp
@@ -416,7 +450,7 @@ class CaffeFeatureExtractor(object):
 
 if __name__ == '__main__':
     def load_image_list(list_file_name):
-        #list_file_path = os.path.join(img_dir, list_file_name)
+        # list_file_path = os.path.join(img_dir, list_file_name)
         f = open(list_file_name, 'r')
         img_fn_list = []
 

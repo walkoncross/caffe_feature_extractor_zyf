@@ -9,5 +9,7 @@
     "channel_swap": "2, 1, 0",
     "mirror_trick": 1,
     "image_as_grey": 0,
-    "normalize_output": 1
+    "normalize_output": 1,
+    "cpu_only": 0,
+    "gpu_id": 0
 }

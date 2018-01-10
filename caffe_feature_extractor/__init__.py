@@ -1,0 +1,1 @@
+import caffe_feature_extractor
