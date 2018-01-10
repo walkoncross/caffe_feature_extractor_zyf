@@ -16,6 +16,18 @@ import caffe
 
 from collections import OrderedDict
 
+from caffe.proto import caffe_pb2
+from caffe.io import blobproto_to_array
+
+
+def load_binaryproto(bp_file):
+    blob_proto = caffe_pb2.BlobProto()
+    data = open(bp_file, 'rb').read()
+    blob_proto.ParseFromString(data)
+    arr = blobproto_to_array(blob_proto)
+#    print type(arr)
+    return arr
+
 
 class CaffeFeatureException(Exception):
     pass
@@ -36,11 +48,11 @@ class CaffeFeatureExtractor(object):
             'batch_size': 1,
             'input_scale': 1.0,
             'raw_scale': 1.0,
-            # BGR, be careful of your input image's channel
+            # default is BGR, be careful of your input image's channel
             'channel_swap': (2, 1, 0),
             # 0,None - will not use mirror_trick, 1 - eltavg (i.e.
-            'mirror_trick': 0,
             # eltsum()*0.5), 2 - eltmax
+            'mirror_trick': 0,
             'image_as_grey': False,
             'normalize_output': False
         }
@@ -65,9 +77,16 @@ class CaffeFeatureExtractor(object):
 
         self.config.update(_config)
 
-        if (self.config['data_mean'] is not None and
-                type(self.config['data_mean']) is str):
-            self.config['data_mean'] = np.load(self.config['data_mean'])
+        mean_arr = None
+        if (self.config['data_mean']):
+            if self.config['data_mean'].endswith('.npy'):
+                mean_arr = np.load(self.config['data_mean'])
+            elif self.config['data_mean'].endswith('.binaryproto'):
+                mean_arr = load_binaryproto(self.config['data_mean'])
+            else:
+                mean_arr = np.matrix(self.config['data_mean']).A1
+            print 'mean array shape: ', mean_arr.shape
+            print 'mean array: \n', mean_arr
 
         print '\n===> CaffeFeatureExtractor.config: \n', self.config
 
@@ -76,7 +95,7 @@ class CaffeFeatureExtractor(object):
         self.net = caffe.Classifier(self.config['network_prototxt'],
                                     self.config['network_caffemodel'],
                                     None,
-                                    self.config['data_mean'],
+                                    mean_arr,
                                     self.config['input_scale'],
                                     self.config['raw_scale'],
                                     self.config['channel_swap']
