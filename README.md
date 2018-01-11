@@ -5,7 +5,9 @@ A wrapper for extractring features from Caffe network, with a config file to def
 ```
 ---
 |- caffe_feature_extractor  # caffe feature extractor
-|- face_feature_extractor   # detect faces using MTCNN, align faces and extract features
+|- scripts  # test scripts
+    |- extract_features_for_image_list 
+    |- face_feature_extractor   # detect faces using MTCNN, align faces and extract features
 |- utils                    # utils for compare similarity between two features
 ---
 ```
