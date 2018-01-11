@@ -213,8 +213,22 @@ class CaffeFeatureExtractor(object):
                                         + layer_name)
             return None
 
+    def get_layer_names(self):
+        layer_names = self.net.layer_dict.keys()
+        return layer_names
+
+    def get_first_layer_name(self):
+        return self.get_layer_names()[0]
+
+    def get_final_layer_name(self):
+        return self.get_layer_names()[-1]
+
     def get_batch_size(self):
         return self.batch_size
+
+    def set_feature_layer(self, layer_name):
+        layer_name = self.get_feature_layer_name(layer_name)
+        self.config['feature_layer'] = layer_name
 
     def extract_feature(self, image, layer_name=None):
         layer_name = self.get_feature_layer_name(layer_name)
