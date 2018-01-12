@@ -92,7 +92,7 @@ class CaffeFeatureExtractor(object):
         _config['data_mean'] = str(_config['data_mean'])
         _config['feature_layer'] = str(_config['feature_layer'])
         _config['channel_swap'] = tuple(
-            [int(i) for i in _config['channel_swap'].split(',')])
+            [int(i.strip()) for i in _config['channel_swap'].split(',')])
 
         self.config.update(_config)
 
@@ -209,12 +209,15 @@ class CaffeFeatureExtractor(object):
         if isinstance(layer_names, list):
             return layer_names
         elif isinstance(layer_names, str):
-            return layer_names.split(',')
+            spl = layer_names.split(',')
+            layers = [layer.strip() for layer in spl]
+            return layers
         else:
             raise FeatureLayerError('layer_names must be '
-                                    'a list of layer names, or a string with '
-                                    'layer names seperated by comma.'
-                                    'Input layer_names is: {}'.format(layer_names))
+                'a list of layer names, or a string with '
+                'layer names seperated by comma.'
+                'Input layer_names is: {}'.format(layer_names)
+            )
 
     def get_feature_layers(self, layer_names=None):
         if not layer_names:
@@ -224,8 +227,9 @@ class CaffeFeatureExtractor(object):
 
         for layer in layer_names:
             if (layer not in self.net.layer_dict.keys()):
-                raise FeatureLayerError('Invalid feature layer names: '
-                                        + layer_names)
+                raise FeatureLayerError(
+                    'Invalid feature layer name:'.format(layer)
+                )
 
         return layer_names
 
@@ -290,8 +294,8 @@ class CaffeFeatureExtractor(object):
 
         features_dict = {}
         for layer in layer_names:
-            # must call blobs_data(v) again, because it invokes (mutable_)cpu_data() which
-            # syncs the memory between GPU and CPU
+            # must call blobs_data(v) again, because it invokes (mutable_)
+            # cpu_data() which syncs the memory between GPU and CPU
             #        blobs = OrderedDict([(k, v.data)
             #                             for k, v in self.net.blobs.items()])
             #        print 'blobs: ', blobs
@@ -301,9 +305,11 @@ class CaffeFeatureExtractor(object):
                 #            ftrs = blobs[layer_names][0:n_imgs * 2, ...]
                 ftrs = feat_blob_data[0:n_imgs * 2, ...]
                 if self.config['mirror_trick'] == 2:
-                    eltop_ftrs = np.maximum(ftrs[:n_imgs], ftrs[n_imgs:])
+                    eltop_ftrs = np.maximum(
+                        ftrs[:n_imgs], ftrs[n_imgs:n_imgs * 2])
                 else:
-                    eltop_ftrs = (ftrs[:n_imgs] + ftrs[n_imgs:]) * 0.5
+                    eltop_ftrs = (ftrs[:n_imgs] +
+                                  ftrs[n_imgs::n_imgs * 2]) * 0.5
 
                 feature = eltop_ftrs[0]
 
@@ -323,6 +329,8 @@ class CaffeFeatureExtractor(object):
 
             if self.config['normalize_output']:
                 feat_norm = norm(feature)
+
+                # inplace-operation
                 feature /= feat_norm
 
             features_dict[layer] = feature
@@ -334,6 +342,7 @@ class CaffeFeatureExtractor(object):
 
         n_imgs = len(images)
 
+        print '---> Calling extract_features_batch():'
         if (n_imgs > self.batch_size
                 or (self.config['mirror_trick'] and n_imgs / 2 > self.batch_size)):
             raise ExtractionError(
@@ -344,10 +353,11 @@ class CaffeFeatureExtractor(object):
             feat_shp = self.net.blobs[layer].data.shape
             print 'layer "{}"feature shape: {}'.format(layer, feat_shp)
 
-            features_shape = (len(images),) + feat_shp[1:]
-            features = np.empty(features_shape, dtype='float32', order='C')
-            print 'output features shape: ', features_shape
-            features_dict[layer] = features
+            # features_shape = (len(images),) + feat_shp[1:]
+            # features = np.empty(features_shape, dtype='float32', order='C')
+            # print 'output features shape: ', features_shape
+
+            # features_dict[layer] = features
 
         # data type must be float32
         img_batch = [im.astype(np.float32) for im in images]
@@ -373,34 +383,37 @@ class CaffeFeatureExtractor(object):
         for layer in layer_names:
             # must call blobs_data(v) again, because it invokes (mutable_)cpu_data() which
             # syncs the memory between GPU and CPU
-    #        blobs = OrderedDict([(k, v.data)
-    #                             for k, v in self.net.blobs.items()])
-    #        print 'blobs: ', blobs
+            #        blobs = OrderedDict([(k, v.data)
+            #                             for k, v in self.net.blobs.items()])
+            #        print 'blobs: ', blobs
             feat_blob_data = self.net.blobs[layer].data
-            features = features_dict[layer]
 
             if self.config['mirror_trick']:
                 #            ftrs = blobs[layer_names][0:n_imgs * 2, ...]
                 ftrs = feat_blob_data[0:n_imgs * 2, ...]
                 if self.config['mirror_trick'] == 2:
-                    eltop_ftrs = np.maximum(ftrs[:n_imgs], ftrs[n_imgs:n_imgs * 2])
+                    eltop_ftrs = np.maximum(
+                        ftrs[:n_imgs], ftrs[n_imgs:n_imgs * 2])
                 else:
-                    eltop_ftrs = (ftrs[:n_imgs] + ftrs[n_imgs:n_imgs * 2]) * 0.5
+                    eltop_ftrs = (ftrs[:n_imgs] +
+                                  ftrs[n_imgs:n_imgs * 2]) * 0.5
 
-                features = eltop_ftrs.copy()
+                features_dict[layer] = eltop_ftrs.copy()
 
             else:
                 #            ftrs = blobs[layer_names][0:n_imgs, ...]
                 ftrs = feat_blob_data[0:n_imgs, ...]
-                features = ftrs.copy()  # copy() is a must-have
+                features_dict[layer] = ftrs.copy()  # copy() is a must-have
 
             print('Predict %d images, cost %f seconds, average time: %f seconds' %
-                (cnt_predict, time_predict, time_predict / cnt_predict))
+                  (cnt_predict, time_predict, time_predict / cnt_predict))
 
-            features = np.asarray(features, dtype='float32')
+            # features = np.asarray(features, dtype='float32')
             if self.config['normalize_output']:
-                feat_norm = norm(features, axis=1)
-                features = features / np.reshape(feat_norm, [-1, 1])
+                feat_norm = norm(features_dict[layer], axis=1)
+
+                # use inplace-operation
+                features_dict[layer] /= np.reshape(feat_norm, [-1, 1])
 
         return features_dict
 
@@ -408,6 +421,8 @@ class CaffeFeatureExtractor(object):
         layer_names = self.get_feature_layers(layer_names)
 
         features_dict = {}
+
+        print '---> Calling extract_features_for_image_list():'
 
         for layer in layer_names:
             feat_shp = self.net.blobs[layer].data.shape
@@ -452,10 +467,12 @@ class CaffeFeatureExtractor(object):
             # print path, type(img), img.mean()
             if (len(img_batch) == self.batch_size) or cnt == features_shape[0] - 1:
                 n_imgs = len(img_batch)
-                ftrs_list = self.extract_features_batch(img_batch, layer_names)
+                layer_ftrs_dict = self.extract_features_batch(
+                    img_batch, layer_names)
 
                 for layer in layer_names:
-                    features_dict[layer][cnt - n_imgs + 1:cnt + 1, ...] = ftrs_list[layer]
+                    features_dict[layer][cnt - n_imgs +
+                                         1:cnt + 1, ...] = layer_ftrs_dict[layer]
 
                 img_batch = []
 
@@ -526,10 +543,11 @@ if __name__ == '__main__':
             np.save(osp.join(save_sub_dir, save_name), ftrs[layer][i])
 
     # test extract_feature()
-#    print '\n===> test extract_feature()'
-#    save_name_2 = 'single_feature.npy'
-#    ftr = feat_extractor.extract_feature(osp.join(image_dir, img_list[0]))
-#    np.save(osp.join(save_dir, save_name_2), ftr[feat_layer_names[0]])
-#
-#    ft_diff = ftr[feat_layer_names[0]] - ftrs[feat_layer_names[0]]
-#    print 'ft_diff: ', ft_diff.sum()
+    print '\n===> test extract_feature()'
+    save_name_2 = 'single_feature.npy'
+    layer = feat_layer_names[0]
+    ftr = feat_extractor.extract_feature(osp.join(image_dir, img_list[0]))
+    np.save(osp.join(save_dir, save_name_2), ftr[layer])
+
+    ft_diff = ftr[layer] - ftrs[layer][0]
+    print 'ft_diff: ', ft_diff.sum()
