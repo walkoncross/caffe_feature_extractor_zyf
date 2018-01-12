@@ -6,12 +6,13 @@ import json
 import _init_paths
 from caffe_feature_extractor import CaffeFeatureExtractor
 
+from numpy.linalg import norm
 
-PROB_THRESH = 0.7
+PROB_THRESH = 0.5
 FIRST_NEW_ID = 10572
 
-PROB_LAYER = 'prob'
-
+CORR_PROB_LAYER = 'fc6'
+FEAT_LAYER = 'fc5'
 
 def process_image_list(feat_extractor, img_list, out_fp1, out_fp2, label_list=None, image_dir=None):
     ftrs = feat_extractor.extract_features_for_image_list(img_list, image_dir)
@@ -37,45 +38,57 @@ def process_image_list(feat_extractor, img_list, out_fp1, out_fp2, label_list=No
             if not osp.exists(save_sub_dir):
                 os.makedirs(save_sub_dir)
 
-            if layer == PROB_LAYER:
-                probs = np.ravel(ftrs[layer][i])
-                print 'probs.shape:', probs.shape
-                save_name = osp.splitext(base_name)[0] + '.npy'
-                np.save(osp.join(save_sub_dir, save_name), probs)
+            save_name = osp.splitext(base_name)[0] + '.npy'
+            np.save(osp.join(save_sub_dir, save_name), ftrs[layer][i])
 
-                print '---> image: ' + img_list[i]
+        # calculate correlation probs
+        feat = np.ravel(ftrs[CORR_PROB_LAYER][i])
+        feat_norm = norm(feat)
+        probs = np.ravel(ftrs[CORR_PROB_LAYER][i]) / feat_norm
+
+        print 'probs.shape:', probs.shape
+
+        sub_dir_0 = 'corr_prob'
+        if sub_dir:
+            save_sub_dir = osp.join(save_dir, sub_dir_0, sub_dir)
+        else:
+            save_sub_dir = osp.join(save_dir, sub_dir_0)
+
+        if not osp.exists(save_sub_dir):
+            os.makedirs(save_sub_dir)
+
+        save_name = osp.splitext(base_name)[0] + '.npy'
+        np.save(osp.join(save_sub_dir, save_name), probs)
+
+        print '---> image: ' + img_list[i]
+        if label_list:
+            print 'original label: ', label_list[i]
+
+        max_label = np.argmax(probs)
+        print 'max_label=%d, probs[%d]=%g' % (max_label, max_label, probs[max_label])
+
+        if probs[max_label] < PROB_THRESH:
+            if out_fp1:
                 if label_list:
-                    print 'original label: ', label_list[i]
-
-                max_label = np.argmax(probs)
-                print 'max_label=%d, probs[%d]=%g' % (max_label, max_label, probs[max_label])
-
-                if probs[max_label] < PROB_THRESH:
-                    if out_fp1:
-                        if label_list:
-                            new_label = label_list[i] + FIRST_NEW_ID
-                            write_string = "%s\t%d\t%d\t%g\t%d\n" % (
-                                img_list[i], new_label, max_label, probs[max_label], label_list[i])
-                        else:
-                            new_label = -1
-                            write_string = "%s\t%d\t%d\t%g\n" % (
-                                img_list[i], new_label, max_label, probs[max_label])
-                        out_fp1.write(write_string)
+                    new_label = label_list[i] + FIRST_NEW_ID
+                    write_string = "%s\t%d\t%d\t%g\t%d\n" % (
+                        img_list[i], new_label, max_label, probs[max_label], label_list[i])
                 else:
-                    new_label = max_label
+                    new_label = -1
+                    write_string = "%s\t%d\t%d\t%g\n" % (
+                        img_list[i], new_label, max_label, probs[max_label])
+                out_fp1.write(write_string)
+        else:
+            new_label = max_label
 
-                    if out_fp2:
-                        if label_list:
-                            write_string = "%s\t%d\t%d\t%g\t%d\n" % (
-                                img_list[i], new_label, max_label, probs[max_label], label_list[i])
-                        else:
-                            write_string = "%s\t%d\t%d\t%g\n" % (
-                                img_list[i], new_label, max_label, probs[max_label])
-                        out_fp2.write(write_string)
-            else:
-                save_name = osp.splitext(base_name)[0] + '.npy'
-                np.save(osp.join(save_sub_dir, save_name), ftrs[layer][i])
-
+            if out_fp2:
+                if label_list:
+                    write_string = "%s\t%d\t%d\t%g\t%d\n" % (
+                        img_list[i], new_label, max_label, probs[max_label], label_list[i])
+                else:
+                    write_string = "%s\t%d\t%d\t%g\n" % (
+                        img_list[i], new_label, max_label, probs[max_label])
+                out_fp2.write(write_string)
 
 def main(config_json, save_dir, image_list_file, image_dir):
     if not osp.exists(save_dir):
@@ -142,7 +155,7 @@ def main(config_json, save_dir, image_list_file, image_dir):
 
 if __name__ == '__main__':
     config_json = './extractor_config_sphere64_webface.json'
-    save_dir = 'softmax_probs_and_refined_labels'
+    save_dir = 'corr_probs_and_refined_labels'
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
     image_dir = r'C:\zyf\github\mtcnn-caffe-good-new\face_aligner\face_chips'
