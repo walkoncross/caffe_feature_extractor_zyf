@@ -40,7 +40,7 @@ class InitError(Error):
 
 
 class FeatureLayerError(Error):
-    """Exception for Invalid feature layer name."""
+    """Exception for Invalid feature layer names."""
     pass
 
 
@@ -90,6 +90,7 @@ class CaffeFeatureExtractor(object):
         _config['network_prototxt'] = str(_config['network_prototxt'])
         _config['network_caffemodel'] = str(_config['network_caffemodel'])
         _config['data_mean'] = str(_config['data_mean'])
+        _config['feature_layer'] = str(_config['feature_layer'])
         _config['channel_swap'] = tuple(
             [int(i) for i in _config['channel_swap'].split(',')])
 
@@ -126,20 +127,22 @@ class CaffeFeatureExtractor(object):
                 'Exception from caffe.set_mode_xxx() or caffe.set_device(): ' + str(err))
 
         try:
-            self.net=Classifier(self.config['network_prototxt'],
-                                        self.config['network_caffemodel'],
-                                        None,
-                                        mean_arr,
-                                        self.config['input_scale'],
-                                        self.config['raw_scale'],
-                                        self.config['channel_swap']
-                                        )
+            self.net = Classifier(self.config['network_prototxt'],
+                                  self.config['network_caffemodel'],
+                                  None,
+                                  mean_arr,
+                                  self.config['input_scale'],
+                                  self.config['raw_scale'],
+                                  self.config['channel_swap']
+                                  )
         except Exception as err:
             raise InitError('Exception from Clssifier.__init__(): ' + str(err))
 
-        if (self.config['feature_layer'] not in self.net.layer_dict.keys()):
-            raise FeatureLayerError('Invalid feature layer name: '
-                                        + self.config['feature_layer'])
+        # if (self.config['feature_layer'] not in self.net.layer_dict.keys()):
+        #     raise FeatureLayerError('Invalid feature layer names: '
+        #                             + self.config['feature_layer'])
+        self.config['feature_layer'] = self.get_feature_layers(
+            self.config['feature_layer'])
 
 #        self.net_blobs = OrderedDict([(k, v.data)
 #                                  for k, v in self.net.blobs.items()])
@@ -147,18 +150,18 @@ class CaffeFeatureExtractor(object):
 #        for k, v in self.net.blobs.items():
 #            print k, v
 
-        self.input_shape=self.net.blobs['data'].data.shape
+        self.input_shape = self.net.blobs['data'].data.shape
         print '---> original input data shape (in prototxt): ', self.input_shape
         print '---> original batch_size (in prototxt): ', self.input_shape[0]
 
-        self.batch_size=self.config['batch_size']
+        self.batch_size = self.config['batch_size']
         print '---> batch size in the config: ', self.batch_size
 
         if self.config['mirror_trick'] > 0:
             print '---> need to double the batch size of the net input data because of mirror_trick'
-            final_batch_size=self.batch_size * 2
+            final_batch_size = self.batch_size * 2
         else:
-            final_batch_size=self.batch_size
+            final_batch_size = self.batch_size
 
         print '---> will use a batch size: ', final_batch_size
 
@@ -173,7 +176,7 @@ class CaffeFeatureExtractor(object):
             except Exception as err:
                 raise InitError('Exception when reshaping net: ' + str(err))
 
-            self.input_shape=self.net.blobs['data'].data.shape
+            self.input_shape = self.net.blobs['data'].data.shape
 
             print '---> after reshape, net input data shape: ', self.input_shape
 
@@ -191,7 +194,7 @@ class CaffeFeatureExtractor(object):
         print 'delete CaffeFeatureExtractor object'
 
     def load_image(self, image_path):
-        img=caffe.io.load_image(
+        img = caffe.io.load_image(
             image_path, color=not self.config['image_as_grey'])
         if self.config['image_as_grey'] and img.shape[2] != 1:
             img = skimage.color.rgb2gray(img)
@@ -202,16 +205,29 @@ class CaffeFeatureExtractor(object):
     def load_images(self, image_path):
         pass
 
-    def get_feature_layer_name(self, layer_name=None):
-        if not layer_name:
+    def split_layer_names(self, layer_names):
+        if isinstance(layer_names, list):
+            return layer_names
+        elif isinstance(layer_names, str):
+            return layer_names.split(',')
+        else:
+            raise FeatureLayerError('layer_names must be '
+                                    'a list of layer names, or a string with '
+                                    'layer names seperated by comma.'
+                                    'Input layer_names is: {}'.format(layer_names))
+
+    def get_feature_layers(self, layer_names=None):
+        if not layer_names:
             return self.config['feature_layer']
 
-        if (layer_name in self.net.layer_dict.keys()):
-            return layer_name
-        else:
-            raise FeatureLayerError('Invalid feature layer name: '
-                                        + layer_name)
-            return None
+        layer_names = self.split_layer_names(layer_names)
+
+        for layer in layer_names:
+            if (layer not in self.net.layer_dict.keys()):
+                raise FeatureLayerError('Invalid feature layer names: '
+                                        + layer_names)
+
+        return layer_names
 
     def get_layer_names(self):
         layer_names = self.net.layer_dict.keys()
@@ -226,15 +242,16 @@ class CaffeFeatureExtractor(object):
     def get_batch_size(self):
         return self.batch_size
 
-    def set_feature_layer(self, layer_name):
-        layer_name = self.get_feature_layer_name(layer_name)
-        self.config['feature_layer'] = layer_name
+    def set_feature_layers(self, layer_names):
+        layer_names = self.get_feature_layers(layer_names)
+        self.config['feature_layer'] = layer_names
 
-    def extract_feature(self, image, layer_name=None):
-        layer_name = self.get_feature_layer_name(layer_name)
+    def extract_feature(self, image, layer_names=None):
+        layer_names = self.get_feature_layers(layer_names)
 
-        feat_shp = self.net.blobs[layer_name].shape
-        print 'feature layer shape: ', feat_shp
+        for layer in layer_names:
+            feat_shp = self.net.blobs[layer].data.shape
+            print 'layer "{}"feature shape: {}'.format(layer, feat_shp)
 
         img_batch = []
         cnt_load_img = 0
@@ -271,58 +288,66 @@ class CaffeFeatureExtractor(object):
         time_predict += (t2 - t1)
         cnt_predict += n_imgs
 
-        # must call blobs_data(v) again, because it invokes (mutable_)cpu_data() which
-        # syncs the memory between GPU and CPU
-#        blobs = OrderedDict([(k, v.data)
-#                             for k, v in self.net.blobs.items()])
-#        print 'blobs: ', blobs
-        feat_blob_data = self.net.blobs[layer_name].data
+        features_dict = {}
+        for layer in layer_names:
+            # must call blobs_data(v) again, because it invokes (mutable_)cpu_data() which
+            # syncs the memory between GPU and CPU
+            #        blobs = OrderedDict([(k, v.data)
+            #                             for k, v in self.net.blobs.items()])
+            #        print 'blobs: ', blobs
+            feat_blob_data = self.net.blobs[layer].data
 
-        if self.config['mirror_trick']:
-            #            ftrs = blobs[layer_name][0:n_imgs * 2, ...]
-            ftrs = feat_blob_data[0:n_imgs * 2, ...]
-            if self.config['mirror_trick'] == 2:
-                eltop_ftrs = np.maximum(ftrs[:n_imgs], ftrs[n_imgs:])
+            if self.config['mirror_trick']:
+                #            ftrs = blobs[layer_names][0:n_imgs * 2, ...]
+                ftrs = feat_blob_data[0:n_imgs * 2, ...]
+                if self.config['mirror_trick'] == 2:
+                    eltop_ftrs = np.maximum(ftrs[:n_imgs], ftrs[n_imgs:])
+                else:
+                    eltop_ftrs = (ftrs[:n_imgs] + ftrs[n_imgs:]) * 0.5
+
+                feature = eltop_ftrs[0]
+
             else:
-                eltop_ftrs = (ftrs[:n_imgs] + ftrs[n_imgs:]) * 0.5
+                #            ftrs = blobs[layer_names][0:n_imgs, ...]
+                ftrs = feat_blob_data[0:n_imgs, ...]
+                feature = ftrs.copy()  # copy() is a must-have
 
-            feature = eltop_ftrs[0]
+            if cnt_load_img:
+                print ('load %d images cost %f seconds, average time: %f seconds'
+                       % (cnt_load_img, time_load_img, time_load_img / cnt_load_img))
 
-        else:
-            #            ftrs = blobs[layer_name][0:n_imgs, ...]
-            ftrs = feat_blob_data[0:n_imgs, ...]
-            feature = ftrs.copy()  # copy() is a must-have
+            print ('predict %d images cost %f seconds, average time: %f seconds'
+                   % (cnt_predict, time_predict, time_predict / cnt_predict))
 
-        if cnt_load_img:
-            print ('load %d images cost %f seconds, average time: %f seconds'
-                   % (cnt_load_img, time_load_img, time_load_img / cnt_load_img))
+            feature = np.asarray(feature, dtype='float32')
 
-        print ('predict %d images cost %f seconds, average time: %f seconds'
-               % (cnt_predict, time_predict, time_predict / cnt_predict))
+            if self.config['normalize_output']:
+                feat_norm = norm(feature)
+                feature /= feat_norm
 
-        feature = np.asarray(feature, dtype='float32')
+            features_dict[layer] = feature
 
-        if self.config['normalize_output']:
-            feat_norm = norm(feature)
-            feature /= feat_norm
+        return features_dict
 
-        return feature
-
-    def extract_features_batch(self, images, layer_name=None):
-        layer_name = self.get_feature_layer_name(layer_name)
+    def extract_features_batch(self, images, layer_names=None):
+        layer_names = self.get_feature_layers(layer_names)
 
         n_imgs = len(images)
 
         if (n_imgs > self.batch_size
                 or (self.config['mirror_trick'] and n_imgs / 2 > self.batch_size)):
-            raise ExtractionError('Number of input images > batch_size set in prototxt')
+            raise ExtractionError(
+                'Number of input images > batch_size set in prototxt')
 
-        feat_shp = self.net.blobs[layer_name].data.shape
-        print 'feature layer shape: ', feat_shp
+        features_dict = {}
+        for layer in layer_names:
+            feat_shp = self.net.blobs[layer].data.shape
+            print 'layer "{}"feature shape: {}'.format(layer, feat_shp)
 
-        features_shape = (len(images),) + feat_shp[1:]
-        features = np.empty(features_shape, dtype='float32', order='C')
-        print 'output features shape: ', features_shape
+            features_shape = (len(images),) + feat_shp[1:]
+            features = np.empty(features_shape, dtype='float32', order='C')
+            print 'output features shape: ', features_shape
+            features_dict[layer] = features
 
         # data type must be float32
         img_batch = [im.astype(np.float32) for im in images]
@@ -345,47 +370,61 @@ class CaffeFeatureExtractor(object):
         time_predict += (t2 - t1)
         cnt_predict += n_imgs
 
-        # must call blobs_data(v) again, because it invokes (mutable_)cpu_data() which
-        # syncs the memory between GPU and CPU
-#        blobs = OrderedDict([(k, v.data)
-#                             for k, v in self.net.blobs.items()])
-#        print 'blobs: ', blobs
-        feat_blob_data = self.net.blobs[layer_name].data
+        for layer in layer_names:
+            # must call blobs_data(v) again, because it invokes (mutable_)cpu_data() which
+            # syncs the memory between GPU and CPU
+    #        blobs = OrderedDict([(k, v.data)
+    #                             for k, v in self.net.blobs.items()])
+    #        print 'blobs: ', blobs
+            feat_blob_data = self.net.blobs[layer].data
+            features = features_dict[layer]
 
-        if self.config['mirror_trick']:
-            #            ftrs = blobs[layer_name][0:n_imgs * 2, ...]
-            ftrs = feat_blob_data[0:n_imgs * 2, ...]
-            if self.config['mirror_trick'] == 2:
-                eltop_ftrs = np.maximum(ftrs[:n_imgs], ftrs[n_imgs:n_imgs * 2])
+            if self.config['mirror_trick']:
+                #            ftrs = blobs[layer_names][0:n_imgs * 2, ...]
+                ftrs = feat_blob_data[0:n_imgs * 2, ...]
+                if self.config['mirror_trick'] == 2:
+                    eltop_ftrs = np.maximum(ftrs[:n_imgs], ftrs[n_imgs:n_imgs * 2])
+                else:
+                    eltop_ftrs = (ftrs[:n_imgs] + ftrs[n_imgs:n_imgs * 2]) * 0.5
+
+                features = eltop_ftrs.copy()
+
             else:
-                eltop_ftrs = (ftrs[:n_imgs] + ftrs[n_imgs:n_imgs * 2]) * 0.5
+                #            ftrs = blobs[layer_names][0:n_imgs, ...]
+                ftrs = feat_blob_data[0:n_imgs, ...]
+                features = ftrs.copy()  # copy() is a must-have
 
-            features = eltop_ftrs.copy()
+            print('Predict %d images, cost %f seconds, average time: %f seconds' %
+                (cnt_predict, time_predict, time_predict / cnt_predict))
 
-        else:
-            #            ftrs = blobs[layer_name][0:n_imgs, ...]
-            ftrs = feat_blob_data[0:n_imgs, ...]
-            features = ftrs.copy()  # copy() is a must-have
+            features = np.asarray(features, dtype='float32')
+            if self.config['normalize_output']:
+                feat_norm = norm(features, axis=1)
+                features = features / np.reshape(feat_norm, [-1, 1])
 
-        print('Predict %d images, cost %f seconds, average time: %f seconds' %
-              (cnt_predict, time_predict, time_predict / cnt_predict))
+        return features_dict
 
-        features = np.asarray(features, dtype='float32')
-        if self.config['normalize_output']:
-            feat_norm = norm(features, axis=1)
-            features = features / np.reshape(feat_norm, [-1, 1])
+    def extract_features_for_image_list(self, image_list, img_root_dir=None, layer_names=None):
+        layer_names = self.get_feature_layers(layer_names)
 
-        return features
+        features_dict = {}
 
-    def extract_features_for_image_list(self, image_list, img_root_dir=None, layer_name=None):
-        layer_name = self.get_feature_layer_name(layer_name)
+        for layer in layer_names:
+            feat_shp = self.net.blobs[layer].data.shape
+            print 'layer "{}"feature shape: {}'.format(layer, feat_shp)
 
-        feat_shp = self.net.blobs[layer_name].data.shape
-        print 'feature layer shape: ', feat_shp
+            features_shape = (len(image_list),) + feat_shp[1:]
+            features = np.empty(features_shape, dtype='float32', order='C')
+            print 'output features shape: ', features_shape
+            features_dict[layer] = features
 
-        features_shape = (len(image_list),) + feat_shp[1:]
-        features = np.empty(features_shape, dtype='float32', order='C')
-        print 'output features shape: ', features_shape
+        # feat_shp = self.net.blobs[layer_names].data.shape
+        # print 'feature layer shape: ', feat_shp
+
+        # features_shape = (len(image_list),) + feat_shp[1:]
+        # features = np.empty(features_shape, dtype='float32', order='C')
+        # print 'output features shape: ', features_shape
+
         img_batch = []
 
         cnt_load_img = 0
@@ -412,60 +451,18 @@ class CaffeFeatureExtractor(object):
             # print 'image shape: ', img.shape
             # print path, type(img), img.mean()
             if (len(img_batch) == self.batch_size) or cnt == features_shape[0] - 1:
-                # n_imgs = len(img_batch)
-                # if self.config['mirror_trick'] > 0:
-                #     for i in range(n_imgs):
-                #         mirror_img = np.fliplr(img_batch[i])
-                #         img_batch.append(mirror_img)
-                #     print 'add mirrored images into predict batch'
-                #     print 'after add: len(img_batch)=%d' % (len(img_batch))
-
-                # t1 = time.clock()
-
-                # self.net.predict(img_batch, oversample=False)
-
-                # t2 = time.clock()
-                # time_predict += (t2 - t1)
-                # cnt_predict += n_imgs
-
-                # # must call blobs_data(v) again, because it invokes (mutable_)cpu_data() which
-                # # syncs the memory between GPU and CPU
-                # blobs = OrderedDict([(k, v.data)
-                #                      for k, v in self.net.blobs.items()])
-
-                # print ('predict %d images cost %f seconds, average time: %f seconds'
-                #        % (cnt_predict, time_predict, time_predict / cnt_predict))
-                # print '%d images processed' % (cnt + 1,)
-
-                # if self.config['mirror_trick']:
-                #     ftrs = blobs[layer_name][0:n_imgs * 2, ...]
-                #     if self.config['mirror_trick'] == 2:
-                #         eltop_ftrs = np.maximum(ftrs[:n_imgs], ftrs[n_imgs:])
-                #     else:
-                #         eltop_ftrs = (ftrs[:n_imgs] + ftrs[n_imgs:]) * 0.5
-
-                #     features[cnt - n_imgs + 1:cnt + 1, ...] = eltop_ftrs
-
-                # else:
-                #     ftrs = blobs[layer_name][0:n_imgs, ...]
-                #     features[cnt - n_imgs + 1:cnt + 1, ...] = ftrs.copy()
                 n_imgs = len(img_batch)
-                ftrs = self.extract_features_batch(img_batch, layer_name)
-                features[cnt - n_imgs + 1:cnt + 1, ...] = ftrs.copy()
+                ftrs_list = self.extract_features_batch(img_batch, layer_names)
+
+                for layer in layer_names:
+                    features_dict[layer][cnt - n_imgs + 1:cnt + 1, ...] = ftrs_list[layer]
 
                 img_batch = []
 
         print('Load %d images, cost %f seconds, average time: %f seconds' %
               (cnt_load_img, time_load_img, time_load_img / cnt_load_img))
-#        print('Predict %d images, cost %f seconds, average time: %f seconds' %
-#              (cnt_predict, time_predict, time_predict / cnt_predict))
 
-        features = np.asarray(features, dtype='float32')
-        if self.config['normalize_output']:
-            feat_norm = norm(features, axis=1)
-            features = features / np.reshape(feat_norm, [-1, 1])
-
-        return features
+        return features_dict
 
 
 if __name__ == '__main__':
@@ -504,6 +501,7 @@ if __name__ == '__main__':
     # init a feat_extractor, use a context to release caffe objects
     print '\n===> init a feat_extractor'
     feat_extractor = CaffeFeatureExtractor(config_json)
+    feat_layer_names = feat_extractor.get_feature_layers()
 
     ftrs = feat_extractor.extract_features_for_image_list(img_list, image_dir)
 #    np.save(osp.join(save_dir, save_name), ftrs)
@@ -515,21 +513,23 @@ if __name__ == '__main__':
         base_name = spl[1]
 #        sub_dir = osp.split(spl[0])[1]
         sub_dir = spl[0]
-        save_sub_dir = save_dir
+        for layer in feat_layer_names:
+            if sub_dir:
+                save_sub_dir = osp.join(save_dir, layer, sub_dir)
+            else:
+                save_sub_dir = osp.join(save_dir, layer)
 
-        if sub_dir:
-            save_sub_dir = osp.join(save_dir, sub_dir)
             if not osp.exists(save_sub_dir):
                 os.makedirs(save_sub_dir)
 
-        save_name = osp.splitext(base_name)[0] + '.npy'
-        np.save(osp.join(save_sub_dir, save_name), ftrs[i])
+            save_name = osp.splitext(base_name)[0] + '.npy'
+            np.save(osp.join(save_sub_dir, save_name), ftrs[layer][i])
 
     # test extract_feature()
 #    print '\n===> test extract_feature()'
 #    save_name_2 = 'single_feature.npy'
 #    ftr = feat_extractor.extract_feature(osp.join(image_dir, img_list[0]))
-#    np.save(osp.join(save_dir, save_name_2), ftr)
+#    np.save(osp.join(save_dir, save_name_2), ftr[feat_layer_names[0]])
 #
-#    ft_diff = ftr - ftrs[0]
+#    ft_diff = ftr[feat_layer_names[0]] - ftrs[feat_layer_names[0]]
 #    print 'ft_diff: ', ft_diff.sum()
