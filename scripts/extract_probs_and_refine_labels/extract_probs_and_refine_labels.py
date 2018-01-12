@@ -8,13 +8,17 @@ from caffe_feature_extractor import CaffeFeatureExtractor
 
 
 PROB_THRESH = 0.7
+FIRST_NEW_ID = 10572
 
-FIRST_NEW_ID = 78771
+PROB_LAYER = 'prob'
 
 
 def process_image_list(feat_extractor, img_list, out_fp1, out_fp2, label_list=None, image_dir=None):
     ftrs = feat_extractor.extract_features_for_image_list(img_list, image_dir)
 #    np.save(osp.join(save_dir, save_name), ftrs)
+    feat_layer_names = feat_extractor.get_feature_layers()
+    # layer = feat_layer_names[0]
+    # print '---> feature layer name: ', layer
 
     # root_len = len(image_dir)
 
@@ -23,57 +27,57 @@ def process_image_list(feat_extractor, img_list, out_fp1, out_fp2, label_list=No
         base_name = spl[1]
 #        sub_dir = osp.split(spl[0])[1]
         sub_dir = spl[0]
-        save_sub_dir = save_dir
 
-        if sub_dir:
-            save_sub_dir = osp.join(save_dir, sub_dir)
+        for layer in feat_layer_names:
+            if sub_dir:
+                save_sub_dir = osp.join(save_dir, layer, sub_dir)
+            else:
+                save_sub_dir = osp.join(save_dir, layer)
+
             if not osp.exists(save_sub_dir):
                 os.makedirs(save_sub_dir)
 
-        probs = np.ravel(ftrs[i])
-        print 'probs.shape:', probs.shape
-        save_name = osp.splitext(base_name)[0] + '.npy'
-        np.save(osp.join(save_sub_dir, save_name), probs)
+            if layer == PROB_LAYER:
+                probs = np.ravel(ftrs[layer][i])
+                print 'probs.shape:', probs.shape
+                save_name = osp.splitext(base_name)[0] + '.npy'
+                np.save(osp.join(save_sub_dir, save_name), probs)
 
-        print '---> image: ' + img_list[i]
-        if label_list:
-            print 'original label: ', label_list[i]
-
-        max_label = np.argmax(probs)
-        print 'max_label in probs: ', probs[i]
-
-        if probs[max_label] < PROB_THRESH:
-            if out_fp1:
+                print '---> image: ' + img_list[i]
                 if label_list:
-                    new_label = label_list[i] + FIRST_NEW_ID
-                    write_string = "%s\t%d\t%d\t%g\t%d\n" % (
-                        img_list[i], new_label, max_label, probs[max_label], label_list[i])
+                    print 'original label: ', label_list[i]
+
+                max_label = np.argmax(probs)
+                print 'max_label=%d, probs[%d]=%g' % (max_label, max_label, probs[max_label])
+
+                if probs[max_label] < PROB_THRESH:
+                    if out_fp1:
+                        if label_list:
+                            new_label = label_list[i] + FIRST_NEW_ID
+                            write_string = "%s\t%d\t%d\t%g\t%d\n" % (
+                                img_list[i], new_label, max_label, probs[max_label], label_list[i])
+                        else:
+                            new_label = -1
+                            write_string = "%s\t%d\t%d\t%g\n" % (
+                                img_list[i], new_label, max_label, probs[max_label])
+                        out_fp1.write(write_string)
                 else:
-                    new_label = -1
-                    write_string = "%s\t%d\t%d\t%g\n" % (
-                        img_list[i], new_label, max_label, probs[max_label])
-                out_fp1.write(write_string)
-        else:
-            new_label = max_label
+                    new_label = max_label
 
-            if out_fp2:
-                if label_list:
-                    write_string = "%s\t%d\t%d\t%g\t%d\n" % (
-                        img_list[i], new_label, max_label, probs[max_label], label_list[i])
-                else:
-                    write_string = "%s\t%d\t%d\t%g\n" % (
-                        img_list[i], new_label, max_label, probs[max_label])
-                out_fp2.write(write_string)
+                    if out_fp2:
+                        if label_list:
+                            write_string = "%s\t%d\t%d\t%g\t%d\n" % (
+                                img_list[i], new_label, max_label, probs[max_label], label_list[i])
+                        else:
+                            write_string = "%s\t%d\t%d\t%g\n" % (
+                                img_list[i], new_label, max_label, probs[max_label])
+                        out_fp2.write(write_string)
+            else:
+                save_name = osp.splitext(base_name)[0] + '.npy'
+                np.save(osp.join(save_sub_dir, save_name), ftrs[layer][i])
 
 
-if __name__ == '__main__':
-    config_json = './extractor_config_sphere64_webface.json'
-    save_dir = 'refined_probs_and_labels'
-
-    # image path: osp.join(image_dir, <each line in image_list_file>)
-    image_dir = r'C:\zyf\github\mtcnn-caffe-good-new\face_aligner\face_chips'
-    image_list_file = r'.\face_chips_list_with_label.txt'
-
+def main(config_json, save_dir, image_list_file, image_dir):
     if not osp.exists(save_dir):
         os.makedirs(save_dir)
 
@@ -91,9 +95,9 @@ if __name__ == '__main__':
     feat_extractor = CaffeFeatureExtractor(config_json)
     batch_size = feat_extractor.get_batch_size()
     # overwrite 'feature_layer' in config by the last layer's name
-    prob_layer = feat_extractor.get_final_layer_name()
-    print '===> prob layer name: ', prob_layer
-    feat_extractor.set_feature_layer(prob_layer)
+    # prob_layer = feat_extractor.get_final_layer_name()
+    # print '===> prob layer name: ', prob_layer
+    # feat_extractor.set_feature_layers(prob_layer)
 
     print 'feat_extractor can process %d images in a batch' % batch_size
 
@@ -134,3 +138,14 @@ if __name__ == '__main__':
 
     output_fp1.close()
     output_fp2.close()
+
+
+if __name__ == '__main__':
+    config_json = './extractor_config_sphere64_webface.json'
+    save_dir = 'refined_probs_and_labels'
+
+    # image path: osp.join(image_dir, <each line in image_list_file>)
+    image_dir = r'C:\zyf\github\mtcnn-caffe-good-new\face_aligner\face_chips'
+    image_list_file = r'.\face_chips_list_with_label.txt'
+
+    main(config_json, save_dir, image_list_file, image_dir)
