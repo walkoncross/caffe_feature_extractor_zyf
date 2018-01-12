@@ -31,7 +31,9 @@ json
 }
 ```
 
-Note: 
+Note:  
+
+ *'feature_layer'*: from which layer/layers to extract features, support multiple layers, e.g. "fc5, prob";
 
  *'batch_size'* in the config json file would overwrite the 'batch size' in the prototxt;
 
