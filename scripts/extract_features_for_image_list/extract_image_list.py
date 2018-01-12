@@ -11,42 +11,36 @@ def process_image_list(feat_extractor, img_list, image_dir=None):
 #    np.save(osp.join(save_dir, save_name), ftrs)
 
     # root_len = len(image_dir)
+    feat_layer_names = feat_extractor.get_feature_layers()
 
     for i in range(len(img_list)):
         spl = osp.split(img_list[i])
         base_name = spl[1]
 #        sub_dir = osp.split(spl[0])[1]
         sub_dir = spl[0]
-        save_sub_dir = save_dir
 
-        if sub_dir:
-            save_sub_dir = osp.join(save_dir, sub_dir)
+        for layer in feat_layer_names:
+            if sub_dir:
+                save_sub_dir = osp.join(save_dir, layer, sub_dir)
+            else:
+                save_sub_dir = osp.join(save_dir, layer)
             if not osp.exists(save_sub_dir):
                 os.makedirs(save_sub_dir)
 
-        save_name = osp.splitext(base_name)[0] + '.npy'
-        np.save(osp.join(save_sub_dir, save_name), ftrs[i])
+            save_name = osp.splitext(base_name)[0] + '.npy'
+            np.save(osp.join(save_sub_dir, save_name), ftrs[layer][i])
 
 
-if __name__ == '__main__':
-    config_json = '../extractor_config_sphere64.json'
-    save_dir = 'feature_rlt_sphere64_noflip'
-
-    # image path: osp.join(image_dir, <each line in image_list_file>)
-    image_dir = r'C:\zyf\github\mtcnn-caffe-good-new\face_aligner\face_chips'
-    image_list_file = r'C:\zyf\github\lfw-evaluation-zyf\extract_face_features\face_chips\face_chips_list_2.txt'
-
+def main(config_json, save_dir, image_list_file, image_dir):
     if not osp.exists(save_dir):
         os.makedirs(save_dir)
-
-    # test extract_features_for_image_list()
-    save_name = 'img_list_features.npy'
 
     fp = open(image_list_file, 'r')
 
     # init a feat_extractor
     print '\n===> init a feat_extractor'
     feat_extractor = CaffeFeatureExtractor(config_json)
+
     batch_size = feat_extractor.get_batch_size()
 
     print 'feat_extractor can process %d images in a batch' % batch_size
@@ -77,3 +71,13 @@ if __name__ == '__main__':
         process_image_list(feat_extractor, img_list, image_dir)
 
     fp.close()
+
+
+if __name__ == '__main__':
+    config_json = '../extractor_config_sphere64.json'
+    save_dir = 'feature_rlt_sphere64_noflip'
+
+    # image path: osp.join(image_dir, <each line in image_list_file>)
+    image_dir = r'C:\zyf\github\mtcnn-caffe-good-new\face_aligner\face_chips'
+    image_list_file = r'C:\zyf\github\lfw-evaluation-zyf\extract_face_features\face_chips\face_chips_list_2.txt'
+    main(config_json, save_dir, image_list_file, image_dir)
