@@ -11,6 +11,9 @@
         "raw_scale": 1.0,
         "channel_swap": "0, 1, 2",
         "mirror_trick": 1,
-        "image_as_grey": 0
+        "image_as_grey": 0,
+	"normalize_output": 1,
+	"cpu_only": 0,
+	"gpu_id": 0	
     }
 }

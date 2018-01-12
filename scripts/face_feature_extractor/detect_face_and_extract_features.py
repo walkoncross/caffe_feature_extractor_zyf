@@ -86,6 +86,7 @@ def main(argv):
         aligner = None
 
     feature_extractor = CaffeFeatureExtractor(extractor_config)
+    feat_layer = feature_extractor.get_feature_layers()[0]
 
     fp = open(args.img_list_file, 'r')
     fp_rlt = open(osp.join(save_dir, 'face_feature.json'), 'w')
@@ -203,7 +204,7 @@ def main(argv):
             print '---> Will not do alignment because of option "--no_align"'
             face_chips = [img.astype(np.float)]
 
-        features = feature_extractor.extract_features_batch(face_chips)
+        features = feature_extractor.extract_features_batch(face_chips)[feat_layer]
         t2 = time.clock()
         ttl_feat_time += t2 - t1
         print("Cropping and extracting features for %d faces cost %f seconds" %

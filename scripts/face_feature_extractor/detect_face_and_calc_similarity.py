@@ -174,9 +174,11 @@ def detect_faces_and_extract_features(img_path, ctx_static, ctx_active):
 #        face_chips = [img.astype(np.float)]
         face_chips = [img]
 
+    feat_layer = feature_extractor.get_feature_layers()[0]
+
 #    face_chips = aligner.get_face_chips(img, bboxes, points)
 #    imgs = [chip.astype(np.float) for chip in face_chips]
-    features = feature_extractor.extract_features_batch(face_chips)
+    features = feature_extractor.extract_features_batch(face_chips)[feat_layer]
     t2 = time.clock()
     ttl_feat_time += t2 - t1
     print("Cropping and extracting features for %d faces cost %f seconds" %
