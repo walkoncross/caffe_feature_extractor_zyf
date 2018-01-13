@@ -10,19 +10,22 @@ from caffe_feature_extractor import CaffeFeatureExtractor
 
 from numpy.linalg import norm
 
-PROB_THRESH = 0.5
-FIRST_NEW_ID = 10572
+# prob_thresh = 0.5
+# first_new_id = 10572
 
-CORR_PROB_LAYER = 'fc6'
-FEAT_LAYER = 'fc5'
+# corr_prob_layer = 'fc6'
+# feat_layer = 'fc5'
 
 
-def process_image_list(feat_extractor, img_list,
+def process_image_list(feat_extractor, prob_thresh, first_new_id,
                        out_fp1, out_fp2,
-                       label_list=None, image_dir=None):
+                       img_list, label_list=None, image_dir=None):
     ftrs = feat_extractor.extract_features_for_image_list(img_list, image_dir)
 #    np.save(osp.join(save_dir, save_name), ftrs)
     feat_layer_names = feat_extractor.get_feature_layers()
+
+    corr_prob_layer = feat_layer_names[0]
+    feat_layer = feat_layer_names[1]
     # layer = feat_layer_names[0]
     # print '---> feature layer name: ', layer
 
@@ -47,9 +50,9 @@ def process_image_list(feat_extractor, img_list,
             np.save(osp.join(save_sub_dir, save_name), ftrs[layer][i])
 
         # calculate correlation probs
-        feat = np.ravel(ftrs[CORR_PROB_LAYER][i])
+        feat = np.ravel(ftrs[feat_layer][i])
         feat_norm = norm(feat)
-        probs = np.ravel(ftrs[CORR_PROB_LAYER][i]) / feat_norm
+        probs = np.ravel(ftrs[corr_prob_layer][i]) / feat_norm
 
         print 'probs.shape:', probs.shape
 
@@ -72,10 +75,10 @@ def process_image_list(feat_extractor, img_list,
         max_label = np.argmax(probs)
         print 'max_label=%d, probs[%d]=%g' % (max_label, max_label, probs[max_label])
 
-        if probs[max_label] < PROB_THRESH:
+        if probs[max_label] < prob_thresh:
             if out_fp1:
                 if label_list:
-                    new_label = label_list[i] + FIRST_NEW_ID
+                    new_label = label_list[i] + first_new_id
                     write_string = "%s\t%d\t%d\t%g\t%d\n" % (
                         img_list[i], new_label, max_label, probs[max_label], label_list[i])
                 else:
@@ -96,7 +99,13 @@ def process_image_list(feat_extractor, img_list,
                 out_fp2.write(write_string)
 
 
-def main(config_json, save_dir, image_list_file, image_dir):
+def main(config_json, prob_thresh, first_new_id,
+         image_list_file, image_dir,
+         save_dir=None, num_images=-1):
+
+    if not save_dir:
+        save_dir = 'corr_probs_and_refined_labels'
+
     if not osp.exists(save_dir):
         os.makedirs(save_dir)
 
@@ -141,8 +150,9 @@ def main(config_json, save_dir, image_list_file, image_dir):
             batch_cnt += 1
             print '\n===> Processing batch #%d with %d images' % (batch_cnt, img_cnt)
 
-            process_image_list(feat_extractor, img_list,
-                               output_fp1, output_fp2, label_list, image_dir)
+            process_image_list(feat_extractor, prob_thresh, first_new_id,
+                               output_fp1, output_fp2,
+                               img_list, label_list, image_dir)
             img_cnt = 0
             img_list = []
             label_list = []
@@ -153,8 +163,9 @@ def main(config_json, save_dir, image_list_file, image_dir):
     if img_cnt > 0:
         batch_cnt += 1
         print '\n===> Processing batch #%d with %d images' % (batch_cnt, img_cnt)
-        process_image_list(feat_extractor, img_list,
-                           output_fp1, output_fp2, label_list, image_dir)
+        process_image_list(feat_extractor, prob_thresh, first_new_id,
+                           output_fp1, output_fp2,
+                           img_list, label_list, image_dir)
 
     fp.close()
 
@@ -165,12 +176,16 @@ def main(config_json, save_dir, image_list_file, image_dir):
 if __name__ == '__main__':
 
     config_json = './extractor_config_sphere64_webface.json'
-    save_dir = 'corr_probs_and_refined_labels'
+
+    prob_thresh = 0.5
+    first_new_id = 10572
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
     image_dir = r'C:\zyf\github\mtcnn-caffe-good-new\face_aligner\face_chips'
     image_list_file = r'.\face_chips_list_with_label.txt'
 
+    save_dir = 'corr_probs_and_refined_labels'
     num_images = -1
 
-    main(config_json, save_dir, image_list_file, image_dir, num_images)
+    main(config_json, prob_thresh, first_new_id,
+         image_list_file, image_dir, save_dir, num_images)
