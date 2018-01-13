@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+import sys
 import os
 import os.path as osp
 import numpy as np
@@ -14,7 +16,10 @@ FIRST_NEW_ID = 10572
 CORR_PROB_LAYER = 'fc6'
 FEAT_LAYER = 'fc5'
 
-def process_image_list(feat_extractor, img_list, out_fp1, out_fp2, label_list=None, image_dir=None):
+
+def process_image_list(feat_extractor, img_list,
+                       out_fp1, out_fp2,
+                       label_list=None, image_dir=None):
     ftrs = feat_extractor.extract_features_for_image_list(img_list, image_dir)
 #    np.save(osp.join(save_dir, save_name), ftrs)
     feat_layer_names = feat_extractor.get_feature_layers()
@@ -90,6 +95,7 @@ def process_image_list(feat_extractor, img_list, out_fp1, out_fp2, label_list=No
                         img_list[i], new_label, max_label, probs[max_label])
                 out_fp2.write(write_string)
 
+
 def main(config_json, save_dir, image_list_file, image_dir):
     if not osp.exists(save_dir):
         os.makedirs(save_dir)
@@ -116,7 +122,7 @@ def main(config_json, save_dir, image_list_file, image_dir):
 
     img_list = []
     label_list = []
-    cnt = 0
+    img_cnt = 0
     batch_cnt = 0
 
     for line in fp:
@@ -129,21 +135,24 @@ def main(config_json, save_dir, image_list_file, image_dir):
         if (len(spl) > 1):
             label_list.append(int(spl[1]))
 
-        cnt += 1
+        img_cnt += 1
 
-        if cnt == batch_size:
+        if img_cnt == batch_size or (num_images > 0 and img_cnt == num_images):
             batch_cnt += 1
-            print '\n===> Processing batch #%d with %d images' % (batch_cnt, cnt)
+            print '\n===> Processing batch #%d with %d images' % (batch_cnt, img_cnt)
 
             process_image_list(feat_extractor, img_list,
                                output_fp1, output_fp2, label_list, image_dir)
-            cnt = 0
+            img_cnt = 0
             img_list = []
             label_list = []
 
-    if cnt > 0:
+        if (num_images > 0 and img_cnt == num_images):
+            break
+
+    if img_cnt > 0:
         batch_cnt += 1
-        print '\n===> Processing batch #%d with %d images' % (batch_cnt, cnt)
+        print '\n===> Processing batch #%d with %d images' % (batch_cnt, img_cnt)
         process_image_list(feat_extractor, img_list,
                            output_fp1, output_fp2, label_list, image_dir)
 
@@ -154,6 +163,7 @@ def main(config_json, save_dir, image_list_file, image_dir):
 
 
 if __name__ == '__main__':
+
     config_json = './extractor_config_sphere64_webface.json'
     save_dir = 'corr_probs_and_refined_labels'
 
@@ -161,4 +171,6 @@ if __name__ == '__main__':
     image_dir = r'C:\zyf\github\mtcnn-caffe-good-new\face_aligner\face_chips'
     image_list_file = r'.\face_chips_list_with_label.txt'
 
-    main(config_json, save_dir, image_list_file, image_dir)
+    num_images = -1
+
+    main(config_json, save_dir, image_list_file, image_dir, num_images)
