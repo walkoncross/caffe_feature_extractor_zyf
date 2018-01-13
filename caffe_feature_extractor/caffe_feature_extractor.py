@@ -251,90 +251,91 @@ class CaffeFeatureExtractor(object):
         self.config['feature_layer'] = layer_names
 
     def extract_feature(self, image, layer_names=None):
-        layer_names = self.get_feature_layers(layer_names)
-
-        for layer in layer_names:
-            feat_shp = self.net.blobs[layer].data.shape
-            print 'layer "{}"feature shape: {}'.format(layer, feat_shp)
-
-        img_batch = []
-        cnt_load_img = 0
-        cnt_predict = 0
-
-        time_load_img = 0.0
-        time_predict = 0.0
+#        layer_names = self.get_feature_layers(layer_names)
+#
+#        for layer in layer_names:
+#            feat_shp = self.net.blobs[layer].data.shape
+#            print 'layer "{}"feature shape: {}'.format(layer, feat_shp)
+#
+#        img_batch = []
+#        cnt_load_img = 0
+#        cnt_predict = 0
+#
+#        time_load_img = 0.0
+#        time_predict = 0.0
+        print '---> Calling extract_feature():'
 
         if isinstance(image, str):
-            t1 = time.clock()
+#            t1 = time.clock()
             img = self.load_image(image)
-            cnt_load_img += 1
-            t2 = time.clock()
-            time_predict += (t2 - t1)
+#            cnt_load_img += 1
+#            t2 = time.clock()
+#            time_predict += (t2 - t1)
         else:
             img = image.astype(np.float32)  # data type must be float32
 
         print 'image shape: ', img.shape
 
-        img_batch.append(img)
-
-        if self.config['mirror_trick']:
-            mirror_img = np.fliplr(img)
-            img_batch.append(mirror_img)
-            print 'add mirrored images into predict batch'
-            print 'after add: len(img_batch)=%d' % (len(img_batch))
-
-        n_imgs = 1
-        t1 = time.clock()
-
-        self.net.predict(img_batch, oversample=False)
-
-        t2 = time.clock()
-        time_predict += (t2 - t1)
-        cnt_predict += n_imgs
-
-        features_dict = {}
-        for layer in layer_names:
-            # must call blobs_data(v) again, because it invokes (mutable_)
-            # cpu_data() which syncs the memory between GPU and CPU
-            #        blobs = OrderedDict([(k, v.data)
-            #                             for k, v in self.net.blobs.items()])
-            #        print 'blobs: ', blobs
-            feat_blob_data = self.net.blobs[layer].data
-
-            if self.config['mirror_trick']:
-                #            ftrs = blobs[layer_names][0:n_imgs * 2, ...]
-                ftrs = feat_blob_data[0:n_imgs * 2, ...]
-                if self.config['mirror_trick'] == 2:
-                    eltop_ftrs = np.maximum(
-                        ftrs[:n_imgs], ftrs[n_imgs:n_imgs * 2])
-                else:
-                    eltop_ftrs = (ftrs[:n_imgs] +
-                                  ftrs[n_imgs::n_imgs * 2]) * 0.5
-
-                feature = eltop_ftrs[0]
-
-            else:
-                #            ftrs = blobs[layer_names][0:n_imgs, ...]
-                ftrs = feat_blob_data[0:n_imgs, ...]
-                feature = ftrs.copy()  # copy() is a must-have
-
-            if cnt_load_img:
-                print ('load %d images cost %f seconds, average time: %f seconds'
-                       % (cnt_load_img, time_load_img, time_load_img / cnt_load_img))
-
-            print ('predict %d images cost %f seconds, average time: %f seconds'
-                   % (cnt_predict, time_predict, time_predict / cnt_predict))
-
-            feature = np.asarray(feature, dtype='float32')
-
-            if self.config['normalize_output']:
-                feat_norm = norm(feature)
-
-                # inplace-operation
-                feature /= feat_norm
-
-            features_dict[layer] = feature
-
+#        img_batch.append(img)
+#
+#        if self.config['mirror_trick']:
+#            mirror_img = np.fliplr(img)
+#            img_batch.append(mirror_img)
+#            print 'add mirrored images into predict batch'
+#            print 'after add: len(img_batch)=%d' % (len(img_batch))
+#
+#        n_imgs = 1
+#        t1 = time.clock()
+#
+#        self.net.predict(img_batch, oversample=False)
+#
+#        t2 = time.clock()
+#        time_predict += (t2 - t1)
+#        cnt_predict += n_imgs
+#
+#        features_dict = {}
+#        for layer in layer_names:
+#            # must call blobs_data(v) again, because it invokes (mutable_)
+#            # cpu_data() which syncs the memory between GPU and CPU
+#            #        blobs = OrderedDict([(k, v.data)
+#            #                             for k, v in self.net.blobs.items()])
+#            #        print 'blobs: ', blobs
+#            feat_blob_data = self.net.blobs[layer].data
+#
+#            if self.config['mirror_trick']:
+#                #            ftrs = blobs[layer_names][0:n_imgs * 2, ...]
+#                ftrs = feat_blob_data[0:n_imgs * 2, ...]
+#                if self.config['mirror_trick'] == 2:
+#                    eltop_ftrs = np.maximum(
+#                        ftrs[:n_imgs], ftrs[n_imgs:n_imgs * 2])
+#                else:
+#                    eltop_ftrs = (ftrs[:n_imgs] +
+#                                  ftrs[n_imgs::n_imgs * 2]) * 0.5
+#
+#                feature = eltop_ftrs[0]
+#
+#            else:
+#                #            ftrs = blobs[layer_names][0:n_imgs, ...]
+#                ftrs = feat_blob_data[0:n_imgs, ...]
+#                feature = ftrs.copy()  # copy() is a must-have
+#
+#            if cnt_load_img:
+#                print ('load %d images cost %f seconds, average time: %f seconds'
+#                       % (cnt_load_img, time_load_img, time_load_img / cnt_load_img))
+#
+#            print ('predict %d images cost %f seconds, average time: %f seconds'
+#                   % (cnt_predict, time_predict, time_predict / cnt_predict))
+#
+#            feature = np.asarray(feature, dtype='float32')
+#
+#            if self.config['normalize_output']:
+#                feat_norm = norm(feature)
+#
+#                # inplace-operation
+#                feature /= feat_norm
+#
+#            features_dict[layer] = feature
+        features_dict = self.extract_features_batch([img], layer_names)
         return features_dict
 
     def extract_features_batch(self, images, layer_names=None):
@@ -500,7 +501,7 @@ if __name__ == '__main__':
         return img_fn_list
 
     config_json = './extractor_config.json'
-    save_dir = 'feature_rlt_sphere64_noflip'
+    save_dir = 'feature_rlt_sphere64_eltavg_norm'
 
     image_dir = r'C:\zyf\github\mtcnn-caffe-good-new\face_aligner\face_chips'
     image_list_file = r'C:\zyf\github\lfw-evaluation-zyf\extract_face_features\face_chips\face_chips_list_2.txt'
