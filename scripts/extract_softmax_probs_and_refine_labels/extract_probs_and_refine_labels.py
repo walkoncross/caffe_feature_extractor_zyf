@@ -9,18 +9,24 @@ import _init_paths
 from caffe_feature_extractor import CaffeFeatureExtractor
 
 
-def process_image_list(feat_extractor, prob_thresh, first_new_id,
+def process_image_list(feat_extractor, prob_thresh,
+                       last_new_id, last_orig_label,
+                       calc_orig_label_prob,
                        out_fp1, out_fp2,
                        img_list, label_list=None,
                        image_dir=None, save_dir=None,
                        mirror_input=False):
-    ftrs = feat_extractor.extract_features_for_image_list(img_list, image_dir, mirror_input=mirror_input)
+    ftrs = feat_extractor.extract_features_for_image_list(
+        img_list, image_dir, mirror_input=mirror_input)
 #    np.save(osp.join(save_dir, save_name), ftrs)
     feat_layer_names = feat_extractor.get_feature_layers()
     prob_layer = feat_layer_names[-1]
 
-    for i in range(len(img_list)):
-        spl = osp.split(img_list[i])
+    # print '===> Processing image batch with {} images'.format(len(img_list))
+    # print 'prob_layer name: ', prob_layer
+    for i, img_fn in enumerate(img_list):
+        print '---> image: ' + img_fn
+        spl = osp.split(img_fn)
         base_name = spl[1]
 #        sub_dir = osp.split(spl[0])[1]
         sub_dir = spl[0]
@@ -34,19 +40,20 @@ def process_image_list(feat_extractor, prob_thresh, first_new_id,
             if not osp.exists(save_sub_dir):
                 os.makedirs(save_sub_dir)
 
+            # print 'ftrs[{}].shape: {}'.format(layer, ftrs[layer].shape)
+            
             if layer != prob_layer:
                 save_name = osp.splitext(base_name)[0] + '.npy'
                 np.save(osp.join(save_sub_dir, save_name), ftrs[layer][i])
             else:
                 probs = np.ravel(ftrs[layer][i])
-                print 'probs.shape:', probs.shape
+                # print 'probs.shape:', probs.shape
                 save_name = osp.splitext(base_name)[0] + '.npy'
                 np.save(osp.join(save_sub_dir, save_name), probs)
 
-                print '---> image: ' + img_list[i]
                 if label_list:
                     print 'original label: ', label_list[i]
-                    if first_new_id == 0:
+                    if calc_orig_label_prob:
                         print 'prob[orig_label]: ', probs[label_list[i]]
 
                 max_label = np.argmax(probs)
@@ -57,14 +64,18 @@ def process_image_list(feat_extractor, prob_thresh, first_new_id,
                 if probs[max_label] >= prob_thresh:
                     new_label = max_label
                 elif label_list:
-                    new_label = label_list[i] + first_new_id
+                    if label_list[i] != last_orig_label:
+                        last_orig_label = label_list[i]
+                        last_new_id += 1
+
+                    new_label = last_new_id
 
                 write_string = "%s\t%5d\t%5d\t%.4f" % (
-                    img_list[i], new_label, max_label, probs[max_label])
+                    img_fn, new_label, max_label, probs[max_label])
 
                 if label_list:
                     write_string += "\t%5d" % (label_list[i])
-                    if first_new_id == 0:
+                    if calc_orig_label_prob:
                         write_string += "\t%.4f" % (probs[label_list[i]])
 
                 write_string += '\n'
@@ -73,6 +84,7 @@ def process_image_list(feat_extractor, prob_thresh, first_new_id,
                     out_fp1.write(write_string)
                 else:
                     out_fp2.write(write_string)
+    return last_new_id, last_orig_label
 
 
 def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
@@ -85,6 +97,8 @@ def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
 
     if not osp.exists(save_dir):
         os.makedirs(save_dir)
+
+    calc_orig_label_prob = (first_new_id == 0)
 
     # test extract_features_for_image_list()
     output_fn1 = 'img_list_nonoverlap.txt'
@@ -117,6 +131,9 @@ def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
     img_cnt = 0
     batch_cnt = 0
 
+    last_new_id = first_new_id - 1
+    last_orig_label = -1
+
     for line in fp:
         if line.startswith('#'):
             continue
@@ -133,10 +150,12 @@ def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
             batch_cnt += 1
             print '\n===> Processing batch #%5d with %5d images' % (batch_cnt, img_cnt)
 
-            process_image_list(feat_extractor, prob_thresh, first_new_id,
-                               output_fp1, output_fp2,
-                               img_list, label_list,
-                               image_dir, save_dir, mirror_input)
+            last_new_id, last_orig_label = process_image_list(feat_extractor, prob_thresh,
+                                                last_new_id, last_orig_label,
+                                                calc_orig_label_prob,
+                                                output_fp1, output_fp2,
+                                                img_list, label_list,
+                                                image_dir, save_dir, mirror_input)
             img_cnt = 0
             img_list = []
             label_list = []
@@ -147,10 +166,12 @@ def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
     if img_cnt > 0:
         batch_cnt += 1
         print '\n===> Processing batch #%5d with %5d images' % (batch_cnt, img_cnt)
-        process_image_list(feat_extractor, prob_thresh, first_new_id,
-                           output_fp1, output_fp2,
-                           img_list, label_list,
-                           image_dir, save_dir, mirror_input)
+        last_new_id, last_orig_label = process_image_list(feat_extractor, prob_thresh,
+                                            last_new_id, last_orig_label,
+                                            calc_orig_label_prob,
+                                            output_fp1, output_fp2,
+                                            img_list, label_list,
+                                            image_dir, save_dir, mirror_input)
 
     fp.close()
 
