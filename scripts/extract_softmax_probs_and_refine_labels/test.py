@@ -5,7 +5,7 @@ if __name__ == '__main__':
     config_json = './extractor_config_sphere64_webface.json'
 
     prob_thresh = 0.7
-    first_new_id = 0
+    first_new_id = 10572
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
     image_dir = r'C:\zyf\github\mtcnn-caffe-good-new\face_aligner\face_chips'
