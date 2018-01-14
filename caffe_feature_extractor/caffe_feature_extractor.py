@@ -18,9 +18,9 @@ import _init_paths
 try:
     import caffe
 except ImportError as err:
-    raise ImportError('{}. Please set the correct caffe_root in {}'
-                      'or in the first line of your main python script'.format(
-                        err, osp.join(osp.dirname(__file__), '_init_paths'))
+    raise ImportError('{}. Please set the correct caffe_root in {} '
+                      'or in the first line of your main python script.'.format(
+                        err, osp.absdir(osp.dirname(__file__)) + '/_init_paths.py'))
             )
 
 
