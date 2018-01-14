@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from extract_probs_and_refine_labels import extract_probs_and_refine_labels
 
 if __name__ == '__main__':
