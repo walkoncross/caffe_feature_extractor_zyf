@@ -12,7 +12,7 @@ if __name__ == '__main__':
     image_dir = r'/disk2/data/FACE/webface/CASIA-maxpy-clean_mtcnn_simaligned_96x112'
     image_list_file = r'/disk2/zhaoyafei/face-recog-train/train-val-lists/webface/webface-aligned-list-10572-ids-450833-objs-170503-213839.txt'
 
-    save_dir = 'webface_probs_and_refined_labels'
+    save_dir = 'webface_probs_and_refined_labels_%g' % prob_thresh
     num_images = 512
     mirror_input = 0
 
