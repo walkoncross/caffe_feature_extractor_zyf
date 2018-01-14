@@ -193,12 +193,15 @@ class CaffeFeatureExtractor(object):
     def __delete__(self):
         print 'delete CaffeFeatureExtractor object'
 
-    def load_image(self, image_path):
+    def load_image(self, image_path, mirror=False):
         img = caffe.io.load_image(
             image_path, color=not self.config['image_as_grey'])
         if self.config['image_as_grey'] and img.shape[2] != 1:
             img = skimage.color.rgb2gray(img)
             img = img[:, :, np.newaxis]
+        
+        if mirror:
+            img = np.fliplr(mirror)
 
         return img
 
@@ -250,7 +253,7 @@ class CaffeFeatureExtractor(object):
         layer_names = self.get_feature_layers(layer_names)
         self.config['feature_layer'] = layer_names
 
-    def extract_feature(self, image, layer_names=None):
+    def extract_feature(self, image, layer_names=None, mirror_input=False):
 #        layer_names = self.get_feature_layers(layer_names)
 #
 #        for layer in layer_names:
@@ -335,10 +338,10 @@ class CaffeFeatureExtractor(object):
 #                feature /= feat_norm
 #
 #            features_dict[layer] = feature
-        features_dict = self.extract_features_batch([img], layer_names)
+        features_dict = self.extract_features_batch([img], layer_names, mirror_input)
         return features_dict
 
-    def extract_features_batch(self, images, layer_names=None):
+    def extract_features_batch(self, images, layer_names=None, mirror_input=False):
         layer_names = self.get_feature_layers(layer_names)
 
         n_imgs = len(images)
@@ -365,6 +368,11 @@ class CaffeFeatureExtractor(object):
 
         cnt_predict = 0
         time_predict = 0.0
+
+        if mirror_input:
+            for i in range(n_imgs):
+                mirror_img = np.fliplr(img_batch[i])
+                img_batch[i] = mirror_img
 
         if self.config['mirror_trick'] > 0:
             for i in range(n_imgs):
@@ -418,7 +426,8 @@ class CaffeFeatureExtractor(object):
 
         return features_dict
 
-    def extract_features_for_image_list(self, image_list, img_root_dir=None, layer_names=None):
+    def extract_features_for_image_list(self, image_list, img_root_dir=None,
+             layer_names=None, mirror_input=False):
         layer_names = self.get_feature_layers(layer_names)
 
         features_dict = {}
@@ -469,7 +478,7 @@ class CaffeFeatureExtractor(object):
             if (len(img_batch) == self.batch_size) or cnt == features_shape[0] - 1:
                 n_imgs = len(img_batch)
                 layer_ftrs_dict = self.extract_features_batch(
-                    img_batch, layer_names)
+                    img_batch, layer_names, mirror_input)
 
                 for layer in layer_names:
                     features_dict[layer][cnt - n_imgs +

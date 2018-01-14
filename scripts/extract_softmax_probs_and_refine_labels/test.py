@@ -13,7 +13,8 @@ if __name__ == '__main__':
 
     save_dir = 'rlt_probs_and_refined_labels'
     num_images = -1
+    mirror_input = False
 
     extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
                                     image_list_file, image_dir,
-									save_dir, num_images)
+                                    save_dir, num_images, mirror_input)

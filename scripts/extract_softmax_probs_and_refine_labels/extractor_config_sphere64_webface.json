@@ -7,9 +7,9 @@
     "input_scale": 0.0078125,
     "raw_scale": 255.0,
     "channel_swap": "2, 1, 0",
-    "mirror_trick": 1,
+    "mirror_trick": 0,
     "image_as_grey": 0,
-    "normalize_output": 1,
+    "normalize_output": 0,
     "cpu_only": 0,
     "gpu_id": 0
 }

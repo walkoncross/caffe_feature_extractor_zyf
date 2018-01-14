@@ -12,8 +12,9 @@ from caffe_feature_extractor import CaffeFeatureExtractor
 def process_image_list(feat_extractor, prob_thresh, first_new_id,
                        out_fp1, out_fp2,
                        img_list, label_list=None,
-                       image_dir=None, save_dir=None):
-    ftrs = feat_extractor.extract_features_for_image_list(img_list, image_dir)
+                       image_dir=None, save_dir=None,
+                       mirror_input=False):
+    ftrs = feat_extractor.extract_features_for_image_list(img_list, image_dir, mirror_input)
 #    np.save(osp.join(save_dir, save_name), ftrs)
     feat_layer_names = feat_extractor.get_feature_layers()
     prob_layer = feat_layer_names[-1]
@@ -76,7 +77,8 @@ def process_image_list(feat_extractor, prob_thresh, first_new_id,
 
 def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
                                     image_list_file, image_dir,
-                                    save_dir=None, num_images=-1):
+                                    save_dir=None, num_images=-1,
+                                    mirror_input=False):
 
     if not save_dir:
         save_dir = 'rlt_probs_and_refined_labels'
@@ -134,7 +136,7 @@ def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
             process_image_list(feat_extractor, prob_thresh, first_new_id,
                                output_fp1, output_fp2,
                                img_list, label_list,
-                               image_dir, save_dir)
+                               image_dir, save_dir, mirror_input)
             img_cnt = 0
             img_list = []
             label_list = []
@@ -148,7 +150,7 @@ def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
         process_image_list(feat_extractor, prob_thresh, first_new_id,
                            output_fp1, output_fp2,
                            img_list, label_list,
-                           image_dir, save_dir)
+                           image_dir, save_dir, mirror_input)
 
     fp.close()
 
@@ -168,7 +170,8 @@ if __name__ == '__main__':
 
     save_dir = 'rlt_probs_and_refined_labels'
     num_images = -1
+    mirror_input = False
 
     extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
                                     image_list_file, image_dir,
-                                    save_dir, num_images)
+                                    save_dir, num_images, mirror_input)
