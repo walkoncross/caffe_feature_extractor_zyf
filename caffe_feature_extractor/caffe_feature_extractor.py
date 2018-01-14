@@ -12,7 +12,17 @@ import skimage
 
 import json
 import time
-import caffe
+
+import _init_paths
+
+try:
+    import caffe
+except ImportError as err:
+    raise ImportError('{}. Please set the correct caffe_root in {}'
+                      'or in the first line of your main python script'.format(
+                        err, osp.join(osp.dirname(__file__), '_init_paths'))
+            )
+
 
 # from caffe import Classifier
 from classifier import Classifier
@@ -199,7 +209,7 @@ class CaffeFeatureExtractor(object):
         if self.config['image_as_grey'] and img.shape[2] != 1:
             img = skimage.color.rgb2gray(img)
             img = img[:, :, np.newaxis]
-        
+
         if mirror:
             img = np.fliplr(mirror)
 
@@ -217,10 +227,11 @@ class CaffeFeatureExtractor(object):
             return layers
         else:
             raise FeatureLayerError('layer_names must be '
-                'a list of layer names, or a string with '
-                'layer names seperated by comma.'
-                'Input layer_names is: {}'.format(layer_names)
-            )
+                                    'a list of layer names, or a string with '
+                                    'layer names seperated by comma.'
+                                    'Input layer_names is: {}'.format(
+                                        layer_names)
+                                    )
 
     def get_feature_layers(self, layer_names=None):
         if not layer_names:
@@ -254,22 +265,22 @@ class CaffeFeatureExtractor(object):
         self.config['feature_layer'] = layer_names
 
     def extract_feature(self, image, layer_names=None, mirror_input=False):
-#        layer_names = self.get_feature_layers(layer_names)
-#
-#        for layer in layer_names:
-#            feat_shp = self.net.blobs[layer].data.shape
-#            print 'layer "{}"feature shape: {}'.format(layer, feat_shp)
-#
-#        img_batch = []
-#        cnt_load_img = 0
-#        cnt_predict = 0
-#
-#        time_load_img = 0.0
-#        time_predict = 0.0
+        #        layer_names = self.get_feature_layers(layer_names)
+        #
+        #        for layer in layer_names:
+        #            feat_shp = self.net.blobs[layer].data.shape
+        #            print 'layer "{}"feature shape: {}'.format(layer, feat_shp)
+        #
+        #        img_batch = []
+        #        cnt_load_img = 0
+        #        cnt_predict = 0
+        #
+        #        time_load_img = 0.0
+        #        time_predict = 0.0
         print '---> Calling extract_feature():'
 
         if isinstance(image, str):
-#            t1 = time.clock()
+            #            t1 = time.clock()
             img = self.load_image(image)
 #            cnt_load_img += 1
 #            t2 = time.clock()
@@ -338,7 +349,8 @@ class CaffeFeatureExtractor(object):
 #                feature /= feat_norm
 #
 #            features_dict[layer] = feature
-        features_dict = self.extract_features_batch([img], layer_names, mirror_input)
+        features_dict = self.extract_features_batch(
+            [img], layer_names, mirror_input)
         return features_dict
 
     def extract_features_batch(self, images, layer_names=None, mirror_input=False):
@@ -427,7 +439,7 @@ class CaffeFeatureExtractor(object):
         return features_dict
 
     def extract_features_for_image_list(self, image_list, img_root_dir=None,
-             layer_names=None, mirror_input=False):
+                                        layer_names=None, mirror_input=False):
         layer_names = self.get_feature_layers(layer_names)
 
         features_dict = {}
