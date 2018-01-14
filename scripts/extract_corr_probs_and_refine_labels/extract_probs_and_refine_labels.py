@@ -167,7 +167,6 @@ def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
             label_list.append(int(spl[1]))
 
         batch_img_cnt += 1
-        batch_cnt += 1
         ttl_img_cnt += 1
 
         if batch_img_cnt == batch_size or (num_images > 0 and ttl_img_cnt == num_images):
