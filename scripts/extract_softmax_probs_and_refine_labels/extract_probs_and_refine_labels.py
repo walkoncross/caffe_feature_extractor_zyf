@@ -14,7 +14,7 @@ def process_image_list(feat_extractor, prob_thresh, first_new_id,
                        img_list, label_list=None,
                        image_dir=None, save_dir=None,
                        mirror_input=False):
-    ftrs = feat_extractor.extract_features_for_image_list(img_list, image_dir, mirror_input)
+    ftrs = feat_extractor.extract_features_for_image_list(img_list, image_dir, mirror_input=mirror_input)
 #    np.save(osp.join(save_dir, save_name), ftrs)
     feat_layer_names = feat_extractor.get_feature_layers()
     prob_layer = feat_layer_names[-1]
