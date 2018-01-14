@@ -12,7 +12,7 @@ from numpy.linalg import norm
 
 
 def process_image_list(feat_extractor, prob_thresh,
-                       last_new_id, last_orig_label,
+                       last_new_id, new_id_map,
                        calc_orig_label_prob,
                        out_fp1, out_fp2,
                        img_list, label_list=None,
@@ -84,11 +84,11 @@ def process_image_list(feat_extractor, prob_thresh,
         if probs[max_label] >= prob_thresh:
             new_label = max_label
         elif label_list:
-            if label_list[i] != last_orig_label:
-                last_orig_label = label_list[i]
+            if new_id_map[label_list[i]] < 0:
                 last_new_id += 1
+                new_id_map[label_list[i]] = last_new_id
 
-            new_label = last_new_id
+            new_label = new_id_map[label_list[i]]
 
         write_string = "%s\t%5d\t%5d\t%.4f" % (
             img_fn, new_label, max_label, probs[max_label])
@@ -105,10 +105,11 @@ def process_image_list(feat_extractor, prob_thresh,
         else:
             out_fp2.write(write_string)
 
-    return last_new_id, last_orig_label
+    return last_new_id
 
 
-def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
+def extract_probs_and_refine_labels(config_json, prob_thresh,
+                                    first_new_id, max_orig_label,
                                     image_list_file, image_dir,
                                     save_dir=None, num_images=-1,
                                     mirror_input=False):
@@ -119,12 +120,14 @@ def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
     if not osp.exists(save_dir):
         os.makedirs(save_dir)
 
+    new_id_map = np.ones(max_orig_label + 1, dtype=np.int32) * (-1)
+
     calc_orig_label_prob = (first_new_id == 0)
 
     # test extract_features_for_image_list()
-    output_fn1 = 'img_list_nonoverlap.txt'
+    output_fn1 = 'prob_thresh_%g-nonoverlap-img_list.txt' % prob_thresh
     output_fp1 = open(osp.join(save_dir, output_fn1), 'w')
-    output_fn2 = 'img_list_overlap.txt'
+    output_fn2 = 'prob_thresh_%g-overlap-img_list.txt' % prob_thresh
     output_fp2 = open(osp.join(save_dir, output_fn2), 'w')
 
     output_fp1.write(
@@ -154,7 +157,6 @@ def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
     batch_cnt = 0
 
     last_new_id = first_new_id - 1
-    last_orig_label = -1
 
     for line in fp:
         if line.startswith('#'):
@@ -173,8 +175,8 @@ def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
             batch_cnt += 1
             print '\n===> Processing batch #%5d with %5d images' % (batch_cnt, batch_img_cnt)
 
-            last_new_id, last_orig_label = process_image_list(feat_extractor, prob_thresh,
-                                                last_new_id, last_orig_label,
+            last_new_id = process_image_list(feat_extractor, prob_thresh,
+                                                last_new_id, new_id_map,
                                                 calc_orig_label_prob,
                                                 output_fp1, output_fp2,
                                                 img_list, label_list,
@@ -189,8 +191,8 @@ def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
     if batch_img_cnt > 0:
         batch_cnt += 1
         print '\n===> Processing batch #%5d with %5d images' % (batch_cnt, batch_img_cnt)
-        last_new_id, last_orig_label = process_image_list(feat_extractor, prob_thresh,
-                                            last_new_id, last_orig_label,
+        last_new_id = process_image_list(feat_extractor, prob_thresh,
+                                            last_new_id, new_id_map,
                                             calc_orig_label_prob,
                                             output_fp1, output_fp2,
                                             img_list, label_list,
@@ -201,13 +203,18 @@ def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
     output_fp1.close()
     output_fp2.close()
 
+    new_id_map_fn = 'prob_thresh_%g-nonoverlap-new_id_map.npy' % prob_thresh
+    new_id_map_fn = osp.join(save_dir, new_id_map_fn)
+    np.save(new_id_map_fn, new_id_map)
+
 
 if __name__ == '__main__':
 
     config_json = './extractor_config_sphere64_webface.json'
 
-    prob_thresh = 0.5
+    prob_thresh = 0.55
     first_new_id = 10572
+    max_orig_label = 2
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
     image_dir = r'C:\zyf\github\mtcnn-caffe-good-new\face_aligner\face_chips'
@@ -217,6 +224,7 @@ if __name__ == '__main__':
     num_images = -1
     mirror_input = False
 
-    extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
+    extract_probs_and_refine_labels(config_json, prob_thresh,
+                                    first_new_id, max_orig_label,
                                     image_list_file, image_dir,
                                     save_dir, num_images, mirror_input)

@@ -5,8 +5,9 @@ if __name__ == '__main__':
 
     config_json = './extractor_config_sphere64_webface.json'
 
-    prob_thresh = 0.5
+    prob_thresh = 0.55
     first_new_id = 10572
+    max_orig_label = 2
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
     image_dir = r'C:\zyf\github\mtcnn-caffe-good-new\face_aligner\face_chips'
@@ -16,6 +17,7 @@ if __name__ == '__main__':
     num_images = -1
     mirror_input = False
 
-    extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
+    extract_probs_and_refine_labels(config_json, prob_thresh,
+                                    first_new_id, max_orig_label,
                                     image_list_file, image_dir,
                                     save_dir, num_images, mirror_input)
