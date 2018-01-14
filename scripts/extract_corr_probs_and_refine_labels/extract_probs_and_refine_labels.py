@@ -149,7 +149,8 @@ def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
     img_list = []
     label_list = []
 
-    img_cnt = 0
+    ttl_img_cnt = 0
+    batch_img_cnt = 0
     batch_cnt = 0
 
     last_new_id = first_new_id - 1
@@ -165,11 +166,13 @@ def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
         if (len(spl) > 1):
             label_list.append(int(spl[1]))
 
-        img_cnt += 1
+        batch_img_cnt += 1
+        batch_cnt += 1
+        ttl_img_cnt += 1
 
-        if img_cnt == batch_size or (num_images > 0 and img_cnt == num_images):
+        if batch_img_cnt == batch_size or (num_images > 0 and ttl_img_cnt == num_images):
             batch_cnt += 1
-            print '\n===> Processing batch #%5d with %5d images' % (batch_cnt, img_cnt)
+            print '\n===> Processing batch #%5d with %5d images' % (batch_cnt, batch_img_cnt)
 
             last_new_id, last_orig_label = process_image_list(feat_extractor, prob_thresh,
                                                 last_new_id, last_orig_label,
@@ -177,16 +180,16 @@ def extract_probs_and_refine_labels(config_json, prob_thresh, first_new_id,
                                                 output_fp1, output_fp2,
                                                 img_list, label_list,
                                                 image_dir, save_dir, mirror_input)
-            img_cnt = 0
+            batch_img_cnt = 0
             img_list = []
             label_list = []
 
-        if (num_images > 0 and img_cnt == num_images):
+        if (num_images > 0 and ttl_img_cnt == num_images):
             break
 
-    if img_cnt > 0:
+    if batch_img_cnt > 0:
         batch_cnt += 1
-        print '\n===> Processing batch #%5d with %5d images' % (batch_cnt, img_cnt)
+        print '\n===> Processing batch #%5d with %5d images' % (batch_cnt, batch_img_cnt)
         last_new_id, last_orig_label = process_image_list(feat_extractor, prob_thresh,
                                             last_new_id, last_orig_label,
                                             calc_orig_label_prob,
