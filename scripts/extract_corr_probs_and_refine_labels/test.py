@@ -14,7 +14,7 @@ if __name__ == '__main__':
     image_list_file = r'.\face_chips_list_with_label.txt'
 
     save_dir = 'rlt_probs_and_refined_labels'
-    num_images = -1
+    num_images = -1 # <0, means all images
     mirror_input = False
 
     extract_probs_and_refine_labels(config_json, prob_thresh,

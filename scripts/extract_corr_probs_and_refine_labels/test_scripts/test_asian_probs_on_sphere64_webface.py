@@ -15,7 +15,7 @@ if __name__ == '__main__':
         config_json['gpu_id'] = int(sys.argv[1])
 		
     prob_thresh = 0.55
-    first_new_id = 0
+    first_new_id = 10572
     max_orig_label = 10244
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
