@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     prob_thresh = 0.55
     first_new_id = 78771
-    max_orig_label = 10572
+    max_orig_label = 10571
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
     image_dir = r'/disk2/data/FACE/webface/CASIA-maxpy-clean_mtcnn_simaligned_96x112'

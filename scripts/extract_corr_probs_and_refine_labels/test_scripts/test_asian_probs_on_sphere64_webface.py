@@ -16,7 +16,7 @@ if __name__ == '__main__':
 		
     prob_thresh = 0.55
     first_new_id = 0
-    max_orig_label = 10572
+    max_orig_label = 10244
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
     image_dir = r'/disk2/data/FACE/face-asian/face_asian_align/'
