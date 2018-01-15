@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import os.path as osp
 import numpy as np
 
@@ -74,10 +75,15 @@ def process_image_list(prob_dir, prob_thresh,
 
 def load_probs_and_refine_labels(prob_dir, prob_thresh,
                                     first_new_id, max_orig_label,
-                                    image_list_file, num_images=-1
+                                    image_list_file, num_images=-1,
+                                    save_dir=None
                                     ):
     print 'prob_dir: ', prob_dir
-    save_dir = osp.abspath(osp.join(prob_dir, '..'))
+    if not save_dir:
+        save_dir = osp.abspath(osp.join(prob_dir, '..'))
+    else:
+        if not osp.exists(save_dir):
+            os.makedirs(save_dir)
 
     new_id_map = np.ones(max_orig_label + 1, dtype=np.int32) * (-1)
 
@@ -170,9 +176,13 @@ if __name__ == '__main__':
     prob_dir = '../extract_corr_probs_and_refine_labels/rlt_probs_and_refined_labels/corr_prob'
     image_list_file = '../extract_corr_probs_and_refine_labels/rlt_probs_and_refined_labels/face_chips_list_with_label.txt'
 
+    # save_dir = None
+    save_dir = osp.join(prob_dir, '..')
+
     num_images = -1
     mirror_input = False
 
     load_probs_and_refine_labels(prob_dir, prob_thresh,
                                  first_new_id, max_orig_label,
-                                 image_list_file, num_images)
+                                 image_list_file, num_images,
+                                 save_dir)
