@@ -16,7 +16,7 @@ if __name__ == '__main__':
     image_list_file = r'/disk2/zhaoyafei/face-recog-train/train-val-lists/asian/face_asian_train_list_noval_10245-ids_540735-objs_170818-225846-norootdir.txt'
 
     # save_dir = None
-    save_dir = './asian_probs_on_sphere64_msceleb/corr_prob_threshed_results'
+    save_dir = '../asian_probs_on_sphere64_msceleb/corr_prob_threshed_results'
 
     num_images = -1  # <0, means all images
     mirror_input = False

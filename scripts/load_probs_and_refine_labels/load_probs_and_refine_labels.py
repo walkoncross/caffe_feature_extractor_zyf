@@ -174,7 +174,7 @@ if __name__ == '__main__':
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
     prob_dir = '../extract_corr_probs_and_refine_labels/rlt_probs_and_refined_labels/corr_prob'
-    image_list_file = '../extract_corr_probs_and_refine_labels/rlt_probs_and_refined_labels/face_chips_list_with_label.txt'
+    image_list_file = '../extract_corr_probs_and_refine_labels/face_chips_list_with_label.txt'
 
     # save_dir = None
     save_dir = osp.join(prob_dir, '..')

@@ -13,7 +13,8 @@ if __name__ == '__main__':
     image_list_file = '../extract_corr_probs_and_refine_labels/face_chips_list_with_label.txt'
 
     # save_dir = None
-    save_dir = osp.join(prob_dir, '..')
+#    save_dir = osp.join(prob_dir, '..')
+    save_dir = './rlt'
 
     num_images = -1  # <0, means all images
     mirror_input = False
