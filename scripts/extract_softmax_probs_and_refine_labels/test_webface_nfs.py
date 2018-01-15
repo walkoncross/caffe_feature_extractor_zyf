@@ -14,7 +14,7 @@ if __name__ == '__main__':
     image_list_file = r'/disk2/zhaoyafei/face-recog-train/train-val-lists/webface/webface-aligned-list-10572-ids-450833-objs-170503-213839.txt'
 
     save_dir = 'webface_probs_and_refined_labels'
-    num_images = 512
+    num_images = 512 # <0, means all images
     mirror_input = False
 
     extract_probs_and_refine_labels(config_json, prob_thresh,
