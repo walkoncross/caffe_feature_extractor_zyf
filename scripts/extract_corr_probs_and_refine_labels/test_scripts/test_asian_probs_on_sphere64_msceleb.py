@@ -1,10 +1,18 @@
 #!/usr/bin/env python
 import _init_paths
 from extract_probs_and_refine_labels import extract_probs_and_refine_labels
+import json
+import sys
 
 if __name__ == '__main__':
 
     config_json = './extractor_config_sphere64_msceleb_nfs.json'
+    fp = open(config_json, 'r')
+    config_json = json.load(fp)
+    fp.close()
+
+    if len(sys.argv) > 1:
+        config_json['gpu_id'] = int(sys.argv[1])
 
     prob_thresh = 0.55
     first_new_id = 78771

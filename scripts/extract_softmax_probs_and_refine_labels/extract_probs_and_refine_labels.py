@@ -25,7 +25,7 @@ def process_image_list(feat_extractor, prob_thresh,
     # print '===> Processing image batch with {} images'.format(len(img_list))
     # print 'prob_layer name: ', prob_layer
     for i, img_fn in enumerate(img_list):
-        print '---> image: ' + img_fn
+        # print '---> image: ' + img_fn
         spl = osp.split(img_fn)
         base_name = spl[1]
 #        sub_dir = osp.split(spl[0])[1]
@@ -51,13 +51,13 @@ def process_image_list(feat_extractor, prob_thresh,
                 save_name = osp.splitext(base_name)[0] + '.npy'
                 np.save(osp.join(save_sub_dir, save_name), probs)
 
-                if label_list:
-                    print 'original label: ', label_list[i]
-                    if calc_orig_label_prob:
-                        print 'prob[orig_label]: ', probs[label_list[i]]
+                # if label_list:
+                #     print 'original label: ', label_list[i]
+                #     if calc_orig_label_prob:
+                #         print 'prob[orig_label]: ', probs[label_list[i]]
 
                 max_label = np.argmax(probs)
-                print 'max_label=%5d, probs[max_label]=%.4f' % (max_label, probs[max_label])
+                # print 'max_label=%5d, probs[max_label]=%.4f' % (max_label, probs[max_label])
 
                 new_label = -1
 
