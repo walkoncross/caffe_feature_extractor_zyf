@@ -35,7 +35,7 @@ def load_binaryproto(bp_file):
     data = open(bp_file, 'rb').read()
     blob_proto.ParseFromString(data)
     arr = caffe.io.blobproto_to_array(blob_proto)
-#    print type(arr)
+#    # printtype(arr)
     return arr
 
 
@@ -115,8 +115,8 @@ class CaffeFeatureExtractor(object):
                     mean_arr = load_binaryproto(self.config['data_mean'])
                 else:
                     mean_arr = np.matrix(self.config['data_mean']).A1
-                # print 'mean array shape: ', mean_arr.shape
-                # print 'mean array: \n', mean_arr
+                # # print'mean array shape: ', mean_arr.shape
+                # # print'mean array: \n', mean_arr
             except:
                 raise InitError('Failed to load "data_mean": ' +
                                 str(self.config['data_mean']))
@@ -124,7 +124,7 @@ class CaffeFeatureExtractor(object):
         if (int(self.config['mirror_trick']) not in [0, 1, 2]):
             raise InitError('"mirror_trick" must be one from [0,1,2]')
 
-        print '\n===> CaffeFeatureExtractor.config: \n', self.config
+        # print'\n===> CaffeFeatureExtractor.config: \n', self.config
 
         try:
             if(self.config['cpu_only']):
@@ -156,52 +156,53 @@ class CaffeFeatureExtractor(object):
 
 #        self.net_blobs = OrderedDict([(k, v.data)
 #                                  for k, v in self.net.blobs.items()])
-#        print 'self.net_blobs: ', self.net_blobs
+#        # print'self.net_blobs: ', self.net_blobs
 #        for k, v in self.net.blobs.items():
-#            print k, v
+#            # printk, v
 
         self.input_shape = self.net.blobs['data'].data.shape
-        print '---> original input data shape (in prototxt): ', self.input_shape
-        print '---> original batch_size (in prototxt): ', self.input_shape[0]
+        # print'---> original input data shape (in prototxt): ', self.input_shape
+        # print'---> original batch_size (in prototxt): ', self.input_shape[0]
 
         self.batch_size = self.config['batch_size']
-        print '---> batch size in the config: ', self.batch_size
+        # print'---> batch size in the config: ', self.batch_size
 
         if self.config['mirror_trick'] > 0:
-            print '---> need to double the batch size of the net input data because of mirror_trick'
+            # print'---> need to double the batch size of the net input data because of mirror_trick'
             final_batch_size = self.batch_size * 2
         else:
             final_batch_size = self.batch_size
 
-        print '---> will use a batch size: ', final_batch_size
+        # print'---> will use a batch size: ', final_batch_size
 
         # reshape net into final_batch_size
         if self.input_shape[0] != final_batch_size:
             try:
-                print '---> reshape net input batch size from %d to %d' % (self.input_shape[0], final_batch_size)
+                # print'---> reshape net input batch size from %d to %d' % (self.input_shape[0], final_batch_size)
                 self.net.blobs['data'].reshape(
                     final_batch_size, self.input_shape[1], self.input_shape[2], self.input_shape[3])
-                print '---> reshape the net blobs'
+                # print'---> reshape the net blobs'
                 self.net.reshape()
             except Exception as err:
                 raise InitError('Exception when reshaping net: ' + str(err))
 
             self.input_shape = self.net.blobs['data'].data.shape
 
-            print '---> after reshape, net input data shape: ', self.input_shape
+            # print'---> after reshape, net input data shape: ', self.input_shape
 
-        print '---> the final input data shape: ', self.input_shape
+        # print'---> the final input data shape: ', self.input_shape
 
 #        if self.config['mirror_trick'] > 0:
 #            if self.batch_size < 2:
 #                raise InitError('If using mirror_trick, batch_size of input "data" layer must > 1')
 #
 #            self.batch_size /= 2
-# print 'halve the batch_size for mirror_trick eval: batch_size=',
+# # print'halve the batch_size for mirror_trick eval: batch_size=',
 # self.batch_size
 
-    def __delete__(self):
-        print 'delete CaffeFeatureExtractor object'
+    # def __delete__(self):
+    #     print'delete CaffeFeatureExtractor object'
+    #     pass
 
     def load_image(self, image_path, mirror=False):
         img = caffe.io.load_image(
@@ -269,7 +270,7 @@ class CaffeFeatureExtractor(object):
         #
         #        for layer in layer_names:
         #            feat_shp = self.net.blobs[layer].data.shape
-        #            print 'layer "{}"feature shape: {}'.format(layer, feat_shp)
+        #            # print'layer "{}"feature shape: {}'.format(layer, feat_shp)
         #
         #        img_batch = []
         #        cnt_load_img = 0
@@ -277,7 +278,7 @@ class CaffeFeatureExtractor(object):
         #
         #        time_load_img = 0.0
         #        time_predict = 0.0
-        print '---> Calling extract_feature():'
+        # print'---> Calling extract_feature():'
 
         if isinstance(image, str):
             #            t1 = time.clock()
@@ -288,15 +289,15 @@ class CaffeFeatureExtractor(object):
         else:
             img = image.astype(np.float32)  # data type must be float32
 
-        print 'image shape: ', img.shape
+        # print'image shape: ', img.shape
 
 #        img_batch.append(img)
 #
 #        if self.config['mirror_trick']:
 #            mirror_img = np.fliplr(img)
 #            img_batch.append(mirror_img)
-#            print 'add mirrored images into predict batch'
-#            print 'after add: len(img_batch)=%d' % (len(img_batch))
+#            # print'add mirrored images into predict batch'
+#            # print'after add: len(img_batch)=%d' % (len(img_batch))
 #
 #        n_imgs = 1
 #        t1 = time.clock()
@@ -313,7 +314,7 @@ class CaffeFeatureExtractor(object):
 #            # cpu_data() which syncs the memory between GPU and CPU
 #            #        blobs = OrderedDict([(k, v.data)
 #            #                             for k, v in self.net.blobs.items()])
-#            #        print 'blobs: ', blobs
+#            #        # print'blobs: ', blobs
 #            feat_blob_data = self.net.blobs[layer].data
 #
 #            if self.config['mirror_trick']:
@@ -334,10 +335,10 @@ class CaffeFeatureExtractor(object):
 #                feature = ftrs.copy()  # copy() is a must-have
 #
 #            if cnt_load_img:
-#                print ('load %d images cost %f seconds, average time: %f seconds'
+#                # print('load %d images cost %f seconds, average time: %f seconds'
 #                       % (cnt_load_img, time_load_img, time_load_img / cnt_load_img))
 #
-#            print ('predict %d images cost %f seconds, average time: %f seconds'
+#            # print('predict %d images cost %f seconds, average time: %f seconds'
 #                   % (cnt_predict, time_predict, time_predict / cnt_predict))
 #
 #            feature = np.asarray(feature, dtype='float32')
@@ -358,7 +359,7 @@ class CaffeFeatureExtractor(object):
 
         n_imgs = len(images)
 
-        print '---> Calling extract_features_batch():'
+        # print'---> Calling extract_features_batch():'
         if (n_imgs > self.batch_size
                 or (self.config['mirror_trick'] and n_imgs / 2 > self.batch_size)):
             raise ExtractionError(
@@ -367,11 +368,11 @@ class CaffeFeatureExtractor(object):
         features_dict = {}
         for layer in layer_names:
             feat_shp = self.net.blobs[layer].data.shape
-            print 'layer "{}"feature shape: {}'.format(layer, feat_shp)
+            # print'layer "{}"feature shape: {}'.format(layer, feat_shp)
 
             # features_shape = (len(images),) + feat_shp[1:]
             # features = np.empty(features_shape, dtype='float32', order='C')
-            # print 'output features shape: ', features_shape
+            # # print'output features shape: ', features_shape
 
             # features_dict[layer] = features
 
@@ -390,8 +391,8 @@ class CaffeFeatureExtractor(object):
             for i in range(n_imgs):
                 mirror_img = np.fliplr(img_batch[i])
                 img_batch.append(mirror_img)
-            print 'add mirrored images into predict batch'
-            print 'after add: len(img_batch)=%d' % (len(img_batch))
+            # print'add mirrored images into predict batch'
+            # print'after add: len(img_batch)=%d' % (len(img_batch))
 
         t1 = time.clock()
 
@@ -406,7 +407,7 @@ class CaffeFeatureExtractor(object):
             # syncs the memory between GPU and CPU
             #        blobs = OrderedDict([(k, v.data)
             #                             for k, v in self.net.blobs.items()])
-            #        print 'blobs: ', blobs
+            #        # print'blobs: ', blobs
             feat_blob_data = self.net.blobs[layer].data
 
             if self.config['mirror_trick']:
@@ -426,8 +427,8 @@ class CaffeFeatureExtractor(object):
                 ftrs = feat_blob_data[0:n_imgs, ...]
                 features_dict[layer] = ftrs.copy()  # copy() is a must-have
 
-            print('Predict %d images, cost %f seconds, average time: %f seconds' %
-                  (cnt_predict, time_predict, time_predict / cnt_predict))
+            # print('Predict %d images, cost %f seconds, average time: %f seconds' %
+            #      (cnt_predict, time_predict, time_predict / cnt_predict))
 
             # features = np.asarray(features, dtype='float32')
             if self.config['normalize_output']:
@@ -444,23 +445,23 @@ class CaffeFeatureExtractor(object):
 
         features_dict = {}
 
-        print '---> Calling extract_features_for_image_list():'
+        # print'---> Calling extract_features_for_image_list():'
 
         for layer in layer_names:
             feat_shp = self.net.blobs[layer].data.shape
-            print 'layer "{}"feature shape: {}'.format(layer, feat_shp)
+            # print'layer "{}"feature shape: {}'.format(layer, feat_shp)
 
             features_shape = (len(image_list),) + feat_shp[1:]
             features = np.empty(features_shape, dtype='float32', order='C')
-            print 'output features shape: ', features_shape
+            # print'output features shape: ', features_shape
             features_dict[layer] = features
 
         # feat_shp = self.net.blobs[layer_names].data.shape
-        # print 'feature layer shape: ', feat_shp
+        # # print'feature layer shape: ', feat_shp
 
         # features_shape = (len(image_list),) + feat_shp[1:]
         # features = np.empty(features_shape, dtype='float32', order='C')
-        # print 'output features shape: ', features_shape
+        # # print'output features shape: ', features_shape
 
         img_batch = []
 
@@ -476,8 +477,8 @@ class CaffeFeatureExtractor(object):
                 path = osp.join(img_root_dir, path)
 
             img = self.load_image(path)
-            if cnt == 0:
-                print 'image shape: ', img.shape
+            # if cnt == 0:
+                # print'image shape: ', img.shape
 
             img_batch.append(img)
             t2 = time.clock()
@@ -485,8 +486,8 @@ class CaffeFeatureExtractor(object):
             cnt_load_img += 1
             time_load_img += (t2 - t1)
 
-            # print 'image shape: ', img.shape
-            # print path, type(img), img.mean()
+            # # print'image shape: ', img.shape
+            # # printpath, type(img), img.mean()
             if (len(img_batch) == self.batch_size) or cnt == features_shape[0] - 1:
                 n_imgs = len(img_batch)
                 layer_ftrs_dict = self.extract_features_batch(
@@ -498,8 +499,8 @@ class CaffeFeatureExtractor(object):
 
                 img_batch = []
 
-        print('Load %d images, cost %f seconds, average time: %f seconds' %
-              (cnt_load_img, time_load_img, time_load_img / cnt_load_img))
+        # print('Load %d images, cost %f seconds, average time: %f seconds' %
+        #       (cnt_load_img, time_load_img, time_load_img / cnt_load_img))
 
         return features_dict
 
@@ -535,10 +536,10 @@ if __name__ == '__main__':
 
     img_list = load_image_list(image_list_file)
 
-    print '\n===> test extract_features_for_image_list()'
+    # print'\n===> test extract_features_for_image_list()'
 
     # init a feat_extractor, use a context to release caffe objects
-    print '\n===> init a feat_extractor'
+    # print'\n===> init a feat_extractor'
     feat_extractor = CaffeFeatureExtractor(config_json)
     feat_layer_names = feat_extractor.get_feature_layers()
 
@@ -565,11 +566,11 @@ if __name__ == '__main__':
             np.save(osp.join(save_sub_dir, save_name), ftrs[layer][i])
 
     # test extract_feature()
-    print '\n===> test extract_feature()'
+    # print'\n===> test extract_feature()'
     save_name_2 = 'single_feature.npy'
     layer = feat_layer_names[0]
     ftr = feat_extractor.extract_feature(osp.join(image_dir, img_list[0]))
     np.save(osp.join(save_dir, save_name_2), ftr[layer])
 
     ft_diff = ftr[layer] - ftrs[layer][0]
-    print 'ft_diff: ', ft_diff.sum()
+    # print'ft_diff: ', ft_diff.sum()
