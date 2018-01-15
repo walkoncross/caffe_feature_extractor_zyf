@@ -165,6 +165,9 @@ def extract_probs_and_refine_labels(config_json, prob_thresh,
             img_list = []
             label_list = []
 
+            output_fp1.flush()
+            output_fp2.flush()
+
         if (num_images > 0 and ttl_img_cnt == num_images):
             break
 
