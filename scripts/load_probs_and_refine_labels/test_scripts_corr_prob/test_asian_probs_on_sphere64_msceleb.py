@@ -6,15 +6,16 @@ import numpy as np
 if __name__ == '__main__':
 
     prob_threshs = np.arange(0.4, 0.85, 0.05)
-    first_new_id = 10572
-    max_orig_label = 2
+    first_new_id = 78771
+    max_orig_label = 10244
+
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
-    prob_dir = '../extract_corr_probs_and_refine_labels/rlt_probs_and_refined_labels/corr_prob'
-    image_list_file = '../extract_corr_probs_and_refine_labels/face_chips_list_with_label.txt'
+    prob_dir = r'/home/asian_probs_on_sphere64_msceleb/corr_prob'
+    image_list_file = r'/disk2/zhaoyafei/face-recog-train/train-val-lists/asian/face_asian_train_list_noval_10245-ids_540735-objs_170818-225846-norootdir.txt'
 
     # save_dir = None
-    save_dir = osp.join(prob_dir, '..')
+    save_dir = './asian_probs_on_sphere64_msceleb/corr_prob_threshed_results'
 
     num_images = -1  # <0, means all images
     mirror_input = False
