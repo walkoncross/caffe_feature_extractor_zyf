@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import _init_paths
 from load_probs_and_refine_labels import load_probs_and_refine_labels
 import os.path as osp
 import numpy as np
@@ -6,7 +7,7 @@ import numpy as np
 if __name__ == '__main__':
 
     prob_threshs = np.arange(0.6, 0.96, 0.05)
-    first_new_id = 10572
+    first_new_id = 78771
     max_orig_label = 10244
 
 

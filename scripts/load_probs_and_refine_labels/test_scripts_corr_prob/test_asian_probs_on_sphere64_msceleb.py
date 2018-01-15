@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import _init_paths
 from load_probs_and_refine_labels import load_probs_and_refine_labels
 import os.path as osp
 import numpy as np
