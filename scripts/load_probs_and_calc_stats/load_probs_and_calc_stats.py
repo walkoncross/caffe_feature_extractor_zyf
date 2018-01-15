@@ -35,7 +35,7 @@ def load_probs_and_calc_stats(prob_dir,
 
     num_ids = max_orig_label + 1
 
-    is_train_dataset = (probs_len==num_ids)
+    is_train_dataset = (probs_len == num_ids)
 
     cnt_per_id_vec = np.zeros(num_ids, dtype=np.int32)
 
@@ -86,18 +86,80 @@ def load_probs_and_calc_stats(prob_dir,
     write_string += '\n'
     output_fp.write(write_string)
 
+    inter_ids_avg_min = np.ones(2) * 1.0e10
+    inter_ids_avg_avg = np.ones(2) * 0
+    inter_ids_avg_max = np.ones(2) * -1.0e10
+
+    inter_ids_std_min = np.ones(2) * 1.0e10
+    inter_ids_std_avg = np.ones(2) * 0
+    inter_ids_std_max = np.ones(2) * -1.0e10
+
     for i in range(num_ids):
         probs_sum_vec[i] /= cnt_per_id_vec[i]
         probs_sqsum_vec[i] /= cnt_per_id_vec[i]
         probs_sqsum_vec[i] -= np.square(probs_sum_vec[i])
 
         max_label = np.argmax(probs_sum_vec[i])
+
+        inter_ids_avg_min[0] = min(
+            inter_ids_avg_min[0], probs_sum_vec[i][max_label])
+        inter_ids_avg_max[0] = max(
+            inter_ids_avg_max[0], probs_sum_vec[i][max_label])
+        inter_ids_avg_avg[0] += probs_sum_vec[i][max_label]
+
+        inter_ids_std_min[0] = min(
+            inter_ids_std_min[0], probs_sqsum_vec[i][max_label])
+        inter_ids_std_max[0] = max(
+            inter_ids_std_max[0], probs_sqsum_vec[i][max_label])
+        inter_ids_std_avg[0] += probs_sqsum_vec[i][max_label]
+
         write_string = '%d    %d    %.4f    %.4f' % (
             i, max_label, probs_sum_vec[i][max_label], probs_sqsum_vec[i][max_label], )
-        write_string += '    %.4f    %.4f' % (
-            probs_sum_vec[i][i], probs_sqsum_vec[i][i])
+
+        if is_train_dataset:
+            write_string += '    %.4f    %.4f' % (
+                probs_sum_vec[i][i], probs_sqsum_vec[i][i])
+
+            inter_ids_avg_min[1] = min(
+                inter_ids_avg_min[1], probs_sum_vec[i][i])
+            inter_ids_avg_max[1] = max(
+                inter_ids_avg_max[1], probs_sum_vec[i][i])
+            inter_ids_avg_avg[1] += probs_sum_vec[i][i]
+
+            inter_ids_std_min[1] = min(
+                inter_ids_std_min[1], probs_sqsum_vec[i][i])
+            inter_ids_std_max[1] = max(
+                inter_ids_std_max[1], probs_sqsum_vec[i][i])
+            inter_ids_std_avg[1] += probs_sqsum_vec[i][i]
+
         write_string += '\n'
         output_fp.write(write_string)
+
+    write_string = 'min    ---    %.4f    %.4f' % (
+        inter_ids_avg_min[0], inter_ids_std_min[0])
+    if is_train_dataset:
+        write_string += '    %.4f    %.4f' % (
+            inter_ids_avg_min[1], inter_ids_std_min[1])
+    write_string += '\n'
+    output_fp.write(write_string)
+
+    write_string = 'max    ---    %.4f    %.4f' % (
+        inter_ids_avg_max[0], inter_ids_std_max[0])
+    if is_train_dataset:
+        write_string += '    %.4f    %.4f' % (
+            inter_ids_avg_max[1], inter_ids_std_max[1])
+    write_string += '\n'
+    output_fp.write(write_string)
+
+    write_string = 'avg    ---    %.4f    %.4f' % (
+        inter_ids_avg_avg[0] / num_ids, inter_ids_std_avg[0] / num_ids)
+    if is_train_dataset:
+        write_string += '    %.4f    %.4f' % (
+            inter_ids_avg_avg[1] / num_ids, inter_ids_std_avg[1] / num_ids)
+    write_string += '\n'
+    output_fp.write(write_string)
+
+    output_fp.close()
 
     probs_avg_fn = osp.join(save_dir, 'stats-probs_avg_vec.npy')
     probs_std_fn = osp.join(save_dir, 'stats-probs_std_vec.npy')

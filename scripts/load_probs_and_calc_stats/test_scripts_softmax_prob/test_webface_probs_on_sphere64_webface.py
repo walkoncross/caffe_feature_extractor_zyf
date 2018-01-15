@@ -15,7 +15,7 @@ if __name__ == '__main__':
     image_list_file = r'/disk2/zhaoyafei/face-recog-train/train-val-lists/webface/webface-aligned-list-10572-ids-450833-objs-170503-213839.txt'
 
     # save_dir = None
-    save_dir = '../webface_probs_on_sphere64_webface/softmax_prob_stats'
+    save_dir = '../../prob-results/webface_probs_on_sphere64_webface/softmax_prob_stats'
 
     num_images = -1  # <0, means all images
 
