@@ -20,7 +20,7 @@ try:
 except ImportError as err:
     raise ImportError('{}. Please set the correct caffe_root in {} '
                       'or in the first line of your main python script.'.format(
-                        err, osp.absdir(osp.dirname(__file__)) + '/_init_paths.py')
+                        err, osp.abspath(osp.dirname(__file__)) + '/_init_paths.py')
                     )
 
 
