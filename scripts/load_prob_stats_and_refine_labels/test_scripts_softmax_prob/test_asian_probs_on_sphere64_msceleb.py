@@ -2,6 +2,7 @@
 import _init_paths
 from load_prob_stats_and_refine_labels import load_prob_stats_and_refine_labels
 import os.path as osp
+import numpy as np
 
 
 if __name__ == '__main__':
