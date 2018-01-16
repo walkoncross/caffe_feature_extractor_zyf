@@ -17,7 +17,7 @@ if __name__ == '__main__':
     num_images = -1  # <0, means all images
     min_objs = 5
 
-    load_probs_and_calc_stats(prob_dir, probs_len,
+    load_prob_stats_and_refine_labels(prob_dir, probs_len,
                               max_orig_label,
                               image_list_file, num_images,
                               min_objs)
