@@ -133,7 +133,6 @@ def save_max_label_info_stats(cnt_per_id_fn,
                 inter_ids_std_avg[1] += probs_sqsum_vec[i][i]
 
             write_string += '    %d' % (cnt_per_id_fn[i])
-
             write_string += '\n'
             output_fp.write(write_string)
 

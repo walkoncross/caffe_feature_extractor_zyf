@@ -83,6 +83,7 @@ def load_probs_and_calc_stats(prob_dir,
     write_string = 'orig_label max_label  probs_avg[max_label]  probs_std[max_label]'
     if is_train_dataset:
         write_string += '  probs_avg[orig_label]  probs_std[orig_label]'
+    write_string += '  num_objs'
     write_string += '\n'
     output_fp.write(write_string)
 
@@ -131,7 +132,8 @@ def load_probs_and_calc_stats(prob_dir,
             inter_ids_std_max[1] = max(
                 inter_ids_std_max[1], probs_sqsum_vec[i][i])
             inter_ids_std_avg[1] += probs_sqsum_vec[i][i]
-
+ 
+        write_string += '    %d' % (cnt_per_id_fn[i])
         write_string += '\n'
         output_fp.write(write_string)
 
