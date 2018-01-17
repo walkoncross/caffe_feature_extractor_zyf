@@ -263,6 +263,8 @@ def extract_and_save_probs_stats(config_json, max_orig_label,
     print('\n===> Saving features stats (avg, std) for each id under ' + save_dir)
     save_feats_stats_dict(feats_stats_dict, save_dir)
 
+    print('\n===> Saving save_max_label_info_stats under ' + save_dir)
+
     save_max_label_info_stats(
         cnt_per_id_vec, feats_stats_dict, save_dir, is_train_set)
 
