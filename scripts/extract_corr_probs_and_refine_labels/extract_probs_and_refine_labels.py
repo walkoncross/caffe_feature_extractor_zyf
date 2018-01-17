@@ -39,6 +39,10 @@ def process_image_list(feat_extractor, prob_thresh,
         sub_dir = spl[0]
 
         for layer in feat_layer_names:
+            # skip orignal layer, cause we'll norm it before saving
+            if layer is corr_prob_layer:
+                continue
+
             if sub_dir:
                 save_sub_dir = osp.join(save_dir, layer, sub_dir)
             else:
@@ -77,7 +81,8 @@ def process_image_list(feat_extractor, prob_thresh,
         #         print 'prob[orig_label]: ', probs[label_list[i]]
 
         max_label = np.argmax(probs)
-        # print 'max_label=%5d, probs[max_label]=%.4f' % (max_label, probs[max_label])
+        # print 'max_label=%5d, probs[max_label]=%.4f' % (max_label,
+        # probs[max_label])
 
         new_label = -1
 
@@ -176,11 +181,11 @@ def extract_probs_and_refine_labels(config_json, prob_thresh,
             print '\n===> Processing batch #%5d with %5d images' % (batch_cnt, batch_img_cnt)
 
             last_new_id = process_image_list(feat_extractor, prob_thresh,
-                                                last_new_id, new_id_map,
-                                                calc_orig_label_prob,
-                                                output_fp1, output_fp2,
-                                                img_list, label_list,
-                                                image_dir, save_dir, mirror_input)
+                                             last_new_id, new_id_map,
+                                             calc_orig_label_prob,
+                                             output_fp1, output_fp2,
+                                             img_list, label_list,
+                                             image_dir, save_dir, mirror_input)
             batch_img_cnt = 0
             img_list = []
             label_list = []
@@ -195,11 +200,11 @@ def extract_probs_and_refine_labels(config_json, prob_thresh,
         batch_cnt += 1
         print '\n===> Processing batch #%5d with %5d images' % (batch_cnt, batch_img_cnt)
         last_new_id = process_image_list(feat_extractor, prob_thresh,
-                                            last_new_id, new_id_map,
-                                            calc_orig_label_prob,
-                                            output_fp1, output_fp2,
-                                            img_list, label_list,
-                                            image_dir, save_dir, mirror_input)
+                                         last_new_id, new_id_map,
+                                         calc_orig_label_prob,
+                                         output_fp1, output_fp2,
+                                         img_list, label_list,
+                                         image_dir, save_dir, mirror_input)
 
     fp.close()
 
