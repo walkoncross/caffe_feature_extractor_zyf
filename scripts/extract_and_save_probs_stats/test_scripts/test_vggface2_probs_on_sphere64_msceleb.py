@@ -21,7 +21,7 @@ if __name__ == '__main__':
     image_dir = r'/disk2/data/FACE/vggface2/vggface2_train_aligned/aligned_imgs/'
     image_list_file = r'/disk2/zhaoyafei/face-recog-train/train-val-lists/vggface2/vggface2_aligned_list_8631-ids_3141890-objs_171103-200428.txt'
 
-    save_dir = 'vggface2_probs_on_sphere64_msceleb'
+    save_dir = '../../prob-results/vggface2_probs_on_sphere64_msceleb'
     num_images = -1 # <0, means all images
     mirror_input = False
 

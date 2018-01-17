@@ -22,7 +22,7 @@ if __name__ == '__main__':
     image_dir = r'/disk2/data/FACE/face-asian/face_asian_align/'
     image_list_file = r'/disk2/zhaoyafei/face-recog-train/train-val-lists/asian/face_asian_train_list_noval_10245-ids_540735-objs_170818-225846-norootdir.txt'
 
-    save_dir = 'asian_probs_on_sphere64_msceleb'
+    save_dir = '../../prob-results/asian_probs_on_sphere64_msceleb'
     num_images = -1
     mirror_input = False
 
