@@ -2,7 +2,7 @@
     "network_prototxt": "C:/zyf/dnn_models/face_models/sphere_face_64/sphereface_64_deploy_fc6_prob.prototxt",
     "network_caffemodel": "C:/zyf/dnn_models/face_models/sphere_face_64/sphereface_64_train_bs256_0907/sphereface_64_model_iter_56000.caffemodel",
     "data_mean": "C:/zyf/dnn_models/face_models/centerloss/center_face_mean_127.5_1x3.npy",
-    "feature_layer": "fc5,prob,fc6",
+    "feature_layer": "fc5,fc6,prob",
     "batch_size": 2,
     "input_scale": 0.0078125,
     "raw_scale": 255.0,

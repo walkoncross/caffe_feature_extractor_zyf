@@ -24,7 +24,7 @@ def process_image_batch(feat_extractor,
     feat_layer_names = feat_extractor.get_feature_layers()
 
     feat_layer = feat_layer_names[0]
-    corr_prob_layer = feat_layer_names[-1]
+    corr_prob_layer = feat_layer_names[1]
 
     output_corr_dir = 'corr_prob'
 
