@@ -15,13 +15,13 @@ if __name__ == '__main__':
         config_json['gpu_id'] = int(sys.argv[1])
 
     is_train_set = False
-    max_orig_label = 8630
+    max_orig_label = 2563
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
-    image_dir = r'/disk2/data/FACE/vggface2/vggface2_train_aligned/aligned_imgs/'
-    image_list_file = r'/disk2/zhaoyafei/face-recog-train/train-val-lists/vggface2/vggface2_aligned_list_8631-ids_3141890-objs_171103-200428.txt'
+    image_dir = r'/disk2/data/FACE/vggface-dataset/vggface_mtcnn_aligned_96x112/'
+    image_list_file = r'/disk2/zhaoyafei/face-recog-train/train-val-lists/vggface/vggface-aligned-imglist-2564-ids_1728565-objs_170727-210659.txt'
 
-    save_dir = '../../prob-results/vggface2_probs_on_sphere64_msceleb'
+    save_dir = '../../prob-results/vggface_probs_on_sphere64_msceleb'
     num_images = -1 # <0, means all images
     mirror_input = False
 
