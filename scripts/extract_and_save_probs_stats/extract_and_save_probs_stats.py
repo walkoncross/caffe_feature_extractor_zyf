@@ -18,6 +18,7 @@ def process_image_batch(feat_extractor,
                         image_dir=None,
                         mirror_input=False):
 
+#    print len(img_list)
     ftrs = feat_extractor.extract_features_for_image_list(
         img_list, image_dir, mirror_input=mirror_input)
 #    np.save(osp.join(save_dir, save_name), ftrs)
@@ -40,16 +41,18 @@ def process_image_batch(feat_extractor,
             feats_stats_dict[layer] = np.zeros(
                 shp, dtype=ftrs[layer].dtype)
 
+#    print len(img_list)
+
     for i in range(len(img_list)):
         cnt_per_id_vec[label_list[i]] += 1
+#        print('label_list[i]:', label_list[i])
+#        print('cnt_per_id_vec:', cnt_per_id_vec)
 
         for layer in feat_layer_names:
-            if layer is corr_prob_layer:
-                continue
-
-            feats_stats_dict[layer][0, label_list[i]] += ftrs[layer][i]
-            feats_stats_dict[layer][1, label_list[i]
-                                    ] += np.square(ftrs[layer][i])
+            if layer != corr_prob_layer:
+                feats_stats_dict[layer][0, label_list[i]] += ftrs[layer][i]
+                feats_stats_dict[layer][1, label_list[i]
+                                        ] += np.square(ftrs[layer][i])
 
         # calculate correlation probs
         feat = np.ravel(ftrs[feat_layer][i])
@@ -59,7 +62,7 @@ def process_image_batch(feat_extractor,
         feats_stats_dict[output_corr_dir][0, label_list[i]] += probs
         feats_stats_dict[output_corr_dir][1, label_list[i]] += np.square(probs)
 
-        return feats_stats_dict
+    return feats_stats_dict
 
 
 def save_max_label_info_stats(cnt_per_id_fn,
@@ -83,6 +86,7 @@ def save_max_label_info_stats(cnt_per_id_fn,
         write_string = 'orig_label max_label  probs_avg[max_label]  probs_std[max_label]'
         if is_train_dataset:
             write_string += '  probs_avg[orig_label]  probs_std[orig_label]'
+        write_string += '  num_objs'
         write_string += '\n'
         output_fp.write(write_string)
 
@@ -110,7 +114,7 @@ def save_max_label_info_stats(cnt_per_id_fn,
             inter_ids_std_avg[0] += probs_sqsum_vec[i][max_label]
 
             write_string = '%d    %d    %.4f    %.4f' % (
-                i, max_label, probs_sum_vec[i][max_label], probs_sqsum_vec[i][max_label], )
+                i, max_label, probs_sum_vec[i][max_label], probs_sqsum_vec[i][max_label])
 
             if is_train_dataset:
                 write_string += '    %.4f    %.4f' % (
@@ -127,6 +131,8 @@ def save_max_label_info_stats(cnt_per_id_fn,
                 inter_ids_std_max[1] = max(
                     inter_ids_std_max[1], probs_sqsum_vec[i][i])
                 inter_ids_std_avg[1] += probs_sqsum_vec[i][i]
+
+            write_string += '    %d' % (cnt_per_id_fn[i])
 
             write_string += '\n'
             output_fp.write(write_string)
