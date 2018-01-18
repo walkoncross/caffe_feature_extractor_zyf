@@ -22,7 +22,7 @@ if __name__ == '__main__':
     image_dir = r"/disk2/data/FACE/celeb-1m-mtcnn-aligned/msceleb_align/Faces-Aligned/"
     image_list_file = r'/disk2/zhaoyafei/face-recog-train/train-val-lists/msceleb-1m/MS-Celeb-1M_clean_list_fixed2_78771_ids_5048805_imgs.txt'
 
-    save_dir = '../../prob-results/asian_probs_on_sphere64_msceleb'
+    save_dir = '/home/msceleb_probs_on_sphere64_msceleb'
     num_images = -1 # <0, means all images
     mirror_input = False
 
