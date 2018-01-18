@@ -4,12 +4,14 @@ import os.path as osp
 import numpy as np
 
 from load_prob_stats import load_prob_stats
+from hist import get_hist, plot_hist, calc_otsu_threshold
 
 
 def load_prob_stats_and_refine_labels(stats_dir, prob_threshs,
                                       first_new_id,
                                       image_list_file, num_images=-1,
-                                      min_objs=5):
+                                      min_objs=5,
+                                      only_after_bin_val=None):
 
     cnt_per_id_fn = osp.join(stats_dir, 'stats-cnt_per_id.npy')
     cnt_per_id_vec = np.load(cnt_per_id_fn)
@@ -22,8 +24,22 @@ def load_prob_stats_and_refine_labels(stats_dir, prob_threshs,
 
     # probs_avg_vec = np.load(probs_avg_fn)
     # probs_std_vec = np.save(probs_std_fn)
-    stats_fn = osp.join(stats_dir, 'stats-max-label-info.txt')
+    # stats_fn = osp.join(stats_dir, 'stats-max-label-info.txt')
     prob_avg_vec, max_label_vec = load_prob_stats(stats_dir, num_ids)
+    print 'prob_avg_vec.shape: ', prob_avg_vec.shape
+    
+    hist, bins = get_hist(prob_avg_vec)
+    thresh = calc_otsu_threshold(hist, bins, only_after_bin_val)
+
+    print 'Otsu_threshold for file1: ', thresh
+
+    if not prob_threshs:
+        prob_threshs = []
+    elif not isinstance(prob_threshs, list):
+        prob_threshs = prob_threshs.tolist()
+    
+    if thresh not in prob_threshs:
+        prob_threshs.append(thresh)
 
     for prob_thresh in prob_threshs:
         new_id_map_mat = np.ones(num_ids, dtype=np.int32) * -1
@@ -104,10 +120,12 @@ if __name__ == '__main__':
     num_images = -1
     min_objs = 2
 
+    only_after_bin_val = None
+
     # stats_dir = None
     stats_dir = osp.join(prob_dir, '..')
 
     load_prob_stats_and_refine_labels(prob_dir, prob_threshs,
                                       first_new_id,
                                       image_list_file, num_images,
-                                      min_objs)
+                                      min_objs, only_after_bin_val)

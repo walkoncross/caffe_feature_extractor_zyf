@@ -71,5 +71,8 @@ def plot_hist(arr, bins=None, show=True, save_dir=None):
     plt.title("Histogram")
     if save_dir:
         plt.savefig(save_dir, bbox_inches='tight')
+
     if show:
         plt.show()
+    else:
+        plt.close()

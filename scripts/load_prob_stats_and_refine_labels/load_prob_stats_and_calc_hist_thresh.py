@@ -8,7 +8,8 @@ from hist import get_hist, plot_hist, calc_otsu_threshold
 
 def load_prob_stats_and_calc_hist_thresh(stats_fn, num_ids, num_images=-1,
                                          stats_fn2=None, num_ids2=None, num_images2=-1,
-                                         only_after_bin_val=None):
+                                         only_after_bin_val=None,
+                                         show_hist=True):
     print 'file1: ', stats_fn
     print 'file2: ', stats_fn2
 
@@ -22,7 +23,17 @@ def load_prob_stats_and_calc_hist_thresh(stats_fn, num_ids, num_images=-1,
     out_prefix = osp.splitext(stats_fn)[0]
 
     hist_out_fn = out_prefix + '_thr%g.png' % thresh
-    plot_hist(prob_avg_vec, bins, True, hist_out_fn)
+    plot_hist(prob_avg_vec, bins, show_hist, hist_out_fn)
+
+    thresh_out_fn = out_prefix + '_thr%g.txt' % thresh
+    cnt_gteq_thresh = np.sum(prob_avg_vec >= thresh)
+    cnt_lt_thresh = prob_avg_vec.size - cnt_gteq_thresh
+    fp = open(thresh_out_fn, 'w')
+    write_string = ('thresh: %g\ncnt(>=thresh):%d\ncnt(<thresh):%d' %
+                    (thresh, cnt_gteq_thresh, cnt_lt_thresh)
+                    )
+    fp.write(write_string)
+    fp.close()
 
     if stats_fn2:
         prob_avg_vec2, max_label_vec2 = load_prob_stats(stats_fn2, num_ids2)
@@ -35,7 +46,17 @@ def load_prob_stats_and_calc_hist_thresh(stats_fn, num_ids, num_images=-1,
         out_prefix2 = osp.splitext(stats_fn2)[0]
 
         hist_out_fn2 = out_prefix2 + '_thr%g.png' % thresh2
-        plot_hist(prob_avg_vec2, bins, True, hist_out_fn2)
+        plot_hist(prob_avg_vec2, bins, show_hist, hist_out_fn2)
+
+        thresh_out_fn = out_prefix2 + '_thr%g.txt' % thresh2
+        cnt_gteq_thresh = np.sum(prob_avg_vec2 >= thresh2)
+        cnt_lt_thresh = prob_avg_vec2.size - cnt_gteq_thresh
+        fp = open(thresh_out_fn, 'w')
+        write_string = ('thresh: %g\ncnt(>=thresh):%d\ncnt(<thresh):%d' %
+                        (thresh2, cnt_gteq_thresh, cnt_lt_thresh)
+                        )
+        fp.write(write_string)
+        fp.close()
 
         prob_avg_vec3 = np.hstack((prob_avg_vec, prob_avg_vec2))
         print 'prob_avg_vec.shape: ', prob_avg_vec3.shape
@@ -44,9 +65,19 @@ def load_prob_stats_and_calc_hist_thresh(stats_fn, num_ids, num_images=-1,
 
         out_prefix3 = out_prefix + '_and_' + osp.basename(out_prefix2)
         hist_out_fn3 = out_prefix3 + '_thr%g.png' % thresh3
-        plot_hist(prob_avg_vec3, None, True, hist_out_fn3)
+        plot_hist(prob_avg_vec3, None, show_hist, hist_out_fn3)
 
         print 'Otsu_threshold for file1 and file2: ', thresh3
+
+        thresh_out_fn = out_prefix3 + '_thr%g.txt' % thresh3
+        cnt_gteq_thresh = np.sum(prob_avg_vec3 >= thresh3)
+        cnt_lt_thresh = prob_avg_vec3.size - cnt_gteq_thresh
+        fp = open(thresh_out_fn, 'w')
+        write_string = ('thresh: %g\ncnt(>=thresh):%d\ncnt(<thresh):%d' %
+                        (thresh3, cnt_gteq_thresh, cnt_lt_thresh)
+                        )
+        fp.write(write_string)
+        fp.close()
 
 
 if __name__ == '__main__':
@@ -67,8 +98,12 @@ if __name__ == '__main__':
     num_ids2 = 10245
     num_images2 = -1
 
-    only_after_bin_val = 0.55
+    # only_after_bin_val = None
+    # only_after_bin_val = 0.55
+    only_after_bin_val = 0.7
+
+    show_hist = True
 
     load_prob_stats_and_calc_hist_thresh(stats_fn, num_ids, num_images,
                                          stats_fn2, num_ids2, num_images2,
-                                         only_after_bin_val)
+                                         only_after_bin_val, show_hist)
