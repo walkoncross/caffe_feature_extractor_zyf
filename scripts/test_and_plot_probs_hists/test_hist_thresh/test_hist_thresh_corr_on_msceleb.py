@@ -31,7 +31,7 @@ if __name__ == '__main__':
             save_dir += '_thr_%g' % bin_val
 
         for i, stats_fn in enumerate(stats_fn_list):
-            for j in range(i+1, num_fns):
+            for j in range(i + 1, num_fns):
                 num_images1 = -1
                 num_images2 = -1
                 if num_ids_list:

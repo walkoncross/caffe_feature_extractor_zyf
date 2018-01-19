@@ -129,10 +129,12 @@ def extract_probs_and_refine_labels(config_json, prob_thresh,
 
     calc_orig_label_prob = (first_new_id == 0)
 
+    output_fn_prefix = 'prob_thresh_%g' % prob_thresh
+
     # test extract_features_for_image_list()
-    output_fn1 = 'prob_thresh_%g-nonoverlap-img_list.txt' % prob_thresh
+    output_fn1 = output_fn_prefix + '-nonoverlap-img_list.txt'
     output_fp1 = open(osp.join(save_dir, output_fn1), 'w')
-    output_fn2 = 'prob_thresh_%g-overlap-img_list.txt' % prob_thresh
+    output_fn2 = output_fn_prefix + '-overlap-img_list.txt'
     output_fp2 = open(osp.join(save_dir, output_fn2), 'w')
 
     output_fp1.write(
@@ -211,7 +213,7 @@ def extract_probs_and_refine_labels(config_json, prob_thresh,
     output_fp1.close()
     output_fp2.close()
 
-    new_id_map_fn = 'prob_thresh_%g-nonoverlap-new_id_map.npy' % prob_thresh
+    new_id_map_fn = output_fn_prefix + '-nonoverlap-new_id_map.npy'
     new_id_map_fn = osp.join(save_dir, new_id_map_fn)
     np.save(new_id_map_fn, new_id_map)
 

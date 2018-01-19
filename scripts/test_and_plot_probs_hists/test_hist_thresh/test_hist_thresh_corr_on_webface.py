@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-
+import _init_paths
 from load_prob_stats_and_calc_hist_thresh import load_prob_stats_and_calc_hist_thresh
 
 if __name__ == '__main__':
     stats_fn_list = [
-        r'C:\zyf\dnn_models\face_models\face-datasets-merge\stats-max-label-info-webface-webface-corr.txt',
-        r'C:\zyf\dnn_models\face_models\face-datasets-merge\stats-max-label-info-asian-webface-corr.txt',
-        r'C:\zyf\dnn_models\face_models\face-datasets-merge\corr_prob-stats-max-label-info-vggface-webface.txt',
-        r'C:\zyf\dnn_models\face_models\face-datasets-merge\corr_prob-stats-max-label-info-vggface2-webface.txt'
+        r'C:\zyf\dnn_models\face_models\face-datasets-merge\stats-max-label-info-webface-webface-softmax.txt',
+        r'C:\zyf\dnn_models\face_models\face-datasets-merge\stats-max-label-info-asian-webface-softmax.txt',
+        r'C:\zyf\dnn_models\face_models\face-datasets-merge\softmax_prob-stats-max-label-info-vggface-webface.txt',
+        r'C:\zyf\dnn_models\face_models\face-datasets-merge\softmax_prob-stats-max-label-info-vggface2-webface.txt'
     ]
     num_ids_list = [10572, 10245, 2564, 8631]
     num_images_list = None
@@ -15,14 +15,14 @@ if __name__ == '__main__':
 
 # #    only_after_bin_val = False
 #     only_after_bin_val = 0.55
-# #    only_after_bin_val = 0.7
-    only_after_bin_val_list = [0, 0.55, 0.7]
+# #    only_after_bin_val = 0.5
+    only_after_bin_val_list = [0, 0.55, 0.5]
 
     show_hist = False
 
     num_fns = len(stats_fn_list)
 
-    save_root_dir = './rlt_hist_output/softmax_webface'
+    save_root_dir = './rlt_hist_output/corr_webface'
 
     for bin_val in only_after_bin_val_list:
         save_dir = osp.join(save_root_dir, 'hist_png')
