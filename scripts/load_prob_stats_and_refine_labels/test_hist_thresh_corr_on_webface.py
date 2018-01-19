@@ -21,8 +21,8 @@ if __name__ == '__main__':
     show_hist = False
 
     num_fns = len(stats_fn_list)
-	
-	save_root_dir = './rlt_hist_output/corr_webface'
+
+    save_root_dir = './rlt_hist_output/corr_webface'
 
     for bin_val in only_after_bin_val_list:
         save_dir = osp.join(save_root_dir, 'hist_png')
@@ -37,5 +37,5 @@ if __name__ == '__main__':
                     num_images1 = num_ids_list[i]
                     num_images2 = num_ids_list[i]
                 load_prob_stats_and_calc_hist_thresh(stats_fn_list[i], num_ids_list[i], num_images1,
-                                                    stats_fn_list[j], num_ids_list[j], num_images2,
-                                                    bin_val, show_hist, save_dir)
+                                                     stats_fn_list[j], num_ids_list[j], num_images2,
+                                                     bin_val, show_hist, save_dir)
