@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import os.path as osp
 import numpy as np
 
@@ -9,9 +10,14 @@ from hist import get_hist, plot_hist, calc_otsu_threshold
 def load_prob_stats_and_calc_hist_thresh(stats_fn, num_ids, num_images=-1,
                                          stats_fn2=None, num_ids2=None, num_images2=-1,
                                          only_after_bin_val=None,
-                                         show_hist=True):
+                                         show_hist=True, save_dir=None):
     print 'file1: ', stats_fn
     print 'file2: ', stats_fn2
+
+    if save_dir is None:
+        save_dir = './rlt_hist_output/'
+    if not osp.exists(save_dir):
+        os.makedirs(save_dir)
 
     prob_avg_vec, max_label_vec = load_prob_stats(stats_fn, num_ids)
     print 'prob_avg_vec.shape: ', prob_avg_vec.shape
@@ -21,6 +27,7 @@ def load_prob_stats_and_calc_hist_thresh(stats_fn, num_ids, num_images=-1,
     print 'Otsu_threshold for file1: ', thresh
 
     out_prefix = osp.splitext(stats_fn)[0]
+    out_prefix = osp.join(save_dir, osp.basename(out_prefix))
 
     hist_out_fn = out_prefix + '_thr%g.png' % thresh
     plot_hist(prob_avg_vec, bins, show_hist, hist_out_fn)
@@ -44,6 +51,7 @@ def load_prob_stats_and_calc_hist_thresh(stats_fn, num_ids, num_images=-1,
         print 'Otsu_threshold for file2: ', thresh2
 
         out_prefix2 = osp.splitext(stats_fn2)[0]
+        out_prefix2 = osp.join(save_dir, osp.basename(out_prefix2))
 
         hist_out_fn2 = out_prefix2 + '_thr%g.png' % thresh2
         plot_hist(prob_avg_vec2, bins, show_hist, hist_out_fn2)
@@ -64,6 +72,7 @@ def load_prob_stats_and_calc_hist_thresh(stats_fn, num_ids, num_images=-1,
         thresh3 = calc_otsu_threshold(hist, bins, only_after_bin_val)
 
         out_prefix3 = out_prefix + '_and_' + osp.basename(out_prefix2)
+
         hist_out_fn3 = out_prefix3 + '_thr%g.png' % thresh3
         plot_hist(prob_avg_vec3, None, show_hist, hist_out_fn3)
 
@@ -103,7 +112,8 @@ if __name__ == '__main__':
     only_after_bin_val = 0.7
 
     show_hist = True
+    save_dir=None
 
     load_prob_stats_and_calc_hist_thresh(stats_fn, num_ids, num_images,
                                          stats_fn2, num_ids2, num_images2,
-                                         only_after_bin_val, show_hist)
+                                         only_after_bin_val, show_hist, save_dir)
