@@ -71,7 +71,7 @@ def load_avg_feats_and_calc_corr(avg_feat_fn1, avg_feat_fn2, label1, label2, sav
         os.makedirs(save_dir)
 
     feat_set1 = load_avg_features(avg_feat_fn1)
-    feat_set2 = load_avg_features(avg_feat_fn1)
+    feat_set2 = load_avg_features(avg_feat_fn2)
 
     corr_mat12, corr_mat21 = calc_corr_btw_feat_sets(feat_set1, feat_set2)
 
