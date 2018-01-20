@@ -22,10 +22,10 @@ if __name__ == '__main__':
 
     num_fns = len(avg_feat_fn_list)
     for i in range(num_fns):
-        load_avg_feats_and_calc_corr(
-            avg_feat_fn_list[i], avg_feat_fn_list[i],
-            label_list[i], label_list[i], save_dir
-        )
+        # load_avg_feats_and_calc_corr(
+        #     avg_feat_fn_list[i], avg_feat_fn_list[i],
+        #     label_list[i], label_list[i], save_dir
+        # )
 
         for j in range(i + 1, num_fns):
             load_avg_feats_and_calc_corr(
