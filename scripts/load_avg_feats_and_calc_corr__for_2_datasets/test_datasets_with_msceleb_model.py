@@ -20,7 +20,7 @@ if __name__ == '__main__':
         'msceleb'
     ]
 
-    save_dir = '../prob-results/inter_datasets_avg_fc5_feats_corr_webface'
+    save_dir = '../prob-results/inter_datasets_avg_fc5_feats_corr_msceleb'
 
     num_fns = len(avg_feat_fn_list)
     for i in range(num_fns):
