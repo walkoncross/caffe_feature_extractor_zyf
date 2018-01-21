@@ -77,7 +77,7 @@ def analyse_corr_mat_and_save(corr_mat, save_name):
     fp.close()
 
 
-def load_avg_feats_and_calc_corr_to_wts(config_json, wt_layer, avg_feat_fn1, label, save_dir=None):
+def load_avg_feats_and_calc_corr_to_wts(config_json, wt_layer, avg_feat_fn, label, save_dir=None):
     if not osp.exists(save_dir):
         os.makedirs(save_dir)
 
