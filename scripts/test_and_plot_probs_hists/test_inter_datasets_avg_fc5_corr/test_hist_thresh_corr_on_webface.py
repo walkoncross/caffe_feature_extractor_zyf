@@ -5,7 +5,7 @@ import os.path as osp
 from load_prob_stats_and_calc_hist_thresh import load_prob_stats_and_calc_hist_thresh
 
 if __name__ == '__main__':
-    root_dir = r'C:\zyf\dnn_models\face_models\face-datasets-merge\inter_datasets_avg_fc5_feats_corr_msceleb'
+    root_dir = r'C:\zyf\dnn_models\face_models\face-datasets-merge\inter_datasets_avg_fc5_feats_corr_webface'
     file_list = os.listdir(root_dir)
 
     stats_fn_list = [osp.join(root_dir, fn) for fn in file_list]
@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
     num_fns = len(stats_fn_list)
 
-    save_root_dir = './rlt_avg_fc5_corr_hist/feat_hist_on_msceleb'
+    save_root_dir = './rlt_hist_inter_datasets_avg_fc5_corr/feat_hist_on_webface'
 
     for bin_val in only_after_bin_val_list:
         save_dir = osp.join(save_root_dir, 'hist_png')

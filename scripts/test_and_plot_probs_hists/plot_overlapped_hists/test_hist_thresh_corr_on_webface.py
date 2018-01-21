@@ -15,7 +15,7 @@ if __name__ == '__main__':
     num_images_list = None
 
     show_hist = True
-    save_dir = './rlt_overlap_hists/corr_webface'
+    save_dir = './rlt_hist_overlap_hists/corr_webface'
 
     for i in range(len(stats_fn_list)):
         if i == prime_idx:
