@@ -3,7 +3,7 @@ from load_avg_feats_and_calc_corr_to_wts import load_avg_feats_and_calc_corr_to_
 
 
 if __name__ == '__main__':
-    config_json = './extractor_config_sphere64_webface_nfs.json'
+    config_json = './extractor_config_sphere64_msceleb_nfs.json'
     wt_layer = 'fc6'
 
     avg_feat_fn_list = [
