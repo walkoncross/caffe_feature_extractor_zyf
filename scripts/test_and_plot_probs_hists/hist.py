@@ -25,6 +25,9 @@ def calc_otsu_threshold(hist, bins, only_after_bin_val=False):
 
     sum1 = np.dot(bins_means, hist.T)
 
+    if only_after_bin_val > 0:
+        thresh = only_after_bin_val
+
 #    mean = sum1 / total
 #    print mean
     for i in range(bin_num):
