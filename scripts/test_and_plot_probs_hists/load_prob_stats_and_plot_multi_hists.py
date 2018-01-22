@@ -7,6 +7,22 @@ from load_prob_stats import load_prob_stats
 from hist import get_hist, plot_multi_hists, calc_otsu_threshold
 
 
+def get_auto_label(stats_fn):
+    base_name = osp.basename(stats_fn)
+    spl = osp.splitext(base_name)[0].split('-')
+
+    if 'max-label' in base_name:
+        label_eles = spl[-3:]
+        if label_eles[0] == 'info':
+            label = label_eles[1] + '_on_' + label_eles[2]
+        else:
+            label = label_eles[0] + '_on_' + label_eles[1]
+    elif 'corr_mat' in base_name:
+        label = spl[-1]
+
+    return label
+
+
 def load_prob_stats_and_plot_multi_hists(stats_fn_list, num_ids_list,
                                          num_images_list=None,
                                          show_hist=True,
@@ -40,14 +56,14 @@ def load_prob_stats_and_plot_multi_hists(stats_fn_list, num_ids_list,
         prob_stats_list.append(prob_avg_vec)
 
         if auto_set_label:
-            base_name = osp.basename(stats_fn)
-            spl = osp.splitext(base_name)[0].split('-')
-            label_eles = spl[-3:]
-            if label_eles[0] == 'info':
-                label = label_eles[1] + '_on_' + label_eles[2]
-            else:
-                label = label_eles[0] + '_on_' + label_eles[1]
-
+            # base_name = osp.basename(stats_fn)
+            # spl = osp.splitext(base_name)[0].split('-')
+            # label_eles = spl[-3:]
+            # if label_eles[0] == 'info':
+            #     label = label_eles[1] + '_on_' + label_eles[2]
+            # else:
+            #     label = label_eles[0] + '_on_' + label_eles[1]
+            label = get_auto_label(stats_fn)
             label_list.append(label)
 
 #        print('===> Calc hist')

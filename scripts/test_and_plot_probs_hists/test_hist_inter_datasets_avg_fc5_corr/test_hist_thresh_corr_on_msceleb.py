@@ -5,7 +5,7 @@ import os.path as osp
 from load_prob_stats_and_calc_hist_thresh import load_prob_stats_and_calc_hist_thresh
 
 if __name__ == '__main__':
-    root_dir = r'C:\zyf\dnn_models\face_models\face-datasets-merge\avg_fc5_to_fc6_wts_corr_webface'
+    root_dir = r'C:\zyf\dnn_models\face_models\face-datasets-merge\inter_datasets_avg_fc5_feats_corr_msceleb'
     file_list = os.listdir(root_dir)
 
     stats_fn_list = [osp.join(root_dir, fn) for fn in file_list]
@@ -13,15 +13,15 @@ if __name__ == '__main__':
 
     num_ids_list = []
     for fn in file_list:
-        if fn.endswith('corr_mat-asian.txt'):
+        if fn.startswith('corr_mat-asian'):
             num_ids_list.append(10245)
-        elif fn.endswith('corr_mat-webface.txt'):
+        elif fn.startswith('corr_mat-webface'):
             num_ids_list.append(10572)
-        elif fn.endswith('corr_mat-vggface2.txt'):
+        elif fn.startswith('corr_mat-vggface2'):
             num_ids_list.append(8631)
-        elif fn.endswith('corr_mat-vggface.txt'):
+        elif fn.startswith('corr_mat-vggface-'):
             num_ids_list.append(2564)
-        elif fn.endswith('corr_mat-msceleb.txt'):
+        elif fn.startswith('corr_mat-msceleb'):
             num_ids_list.append(78771)
         else:
             raise Exception('Unkonw dataset')
@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
     num_fns = len(stats_fn_list)
 
-    save_root_dir = './rlt_hist_avg_fc5_to_fc6_wts_corr/feat_hist_on_webface'
+    save_root_dir = './rlt_hist_inter_datasets_avg_fc5_corr/feat_hist_on_msceleb'
 
     for bin_val in only_after_bin_val_list:
         save_dir = osp.join(save_root_dir, 'hist_png')
@@ -49,6 +49,6 @@ if __name__ == '__main__':
                 num_images1 = -1
                 if num_ids_list:
                     num_images1 = num_ids_list[i]
-                load_prob_stats_and_calc_hist_thresh(stats_fn_list[i], num_ids_list[i], num_images1,
-                                                     None, None, None,
+                load_prob_stats_and_calc_hist_thresh(stats_fn_list[i], num_ids_list[i], None, num_images1,
+                                                     None, None, None, None,
                                                      bin_val, show_hist, save_dir)

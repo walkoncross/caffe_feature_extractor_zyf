@@ -7,10 +7,27 @@ from load_prob_stats import load_prob_stats
 from hist import get_hist, plot_hist, calc_otsu_threshold
 
 
-def load_prob_stats_and_calc_hist_thresh(stats_fn, num_ids, num_images=-1,
-                                         stats_fn2=None, num_ids2=None, num_images2=-1,
+def get_auto_label(stats_fn):
+    base_name = osp.basename(stats_fn)
+    spl = osp.splitext(base_name)[0].split('-')
+
+    if 'max-label' in base_name:
+        label_eles = spl[-3:]
+        if label_eles[0] == 'info':
+            label = label_eles[1] + '_on_' + label_eles[2]
+        else:
+            label = label_eles[0] + '_on_' + label_eles[1]
+    elif 'corr_mat' in base_name:
+        label = spl[-1]
+
+    return label
+
+
+def load_prob_stats_and_calc_hist_thresh(stats_fn, num_ids, label1=None, num_images=-1,
+                                         stats_fn2=None, num_ids2=None, label2=None, num_images2=-1,
                                          only_after_bin_val=None,
-                                         show_hist=True, save_dir=None):
+                                         show_hist=True, save_dir=None,
+                                         label_list=None):
     print 'file1: ', stats_fn
     print 'file2: ', stats_fn2
 
@@ -19,6 +36,9 @@ def load_prob_stats_and_calc_hist_thresh(stats_fn, num_ids, num_images=-1,
     if not osp.exists(save_dir):
         os.makedirs(save_dir)
 
+    if not label1:
+        label1 = get_auto_label(stats_fn)
+
     prob_avg_vec, max_label_vec = load_prob_stats(stats_fn, num_ids)
     print 'prob_avg_vec.shape: ', prob_avg_vec.shape
     hist, bins = get_hist(prob_avg_vec)
@@ -26,8 +46,9 @@ def load_prob_stats_and_calc_hist_thresh(stats_fn, num_ids, num_images=-1,
 
     print 'Otsu_threshold for file1: ', thresh
 
-    out_prefix = osp.splitext(stats_fn)[0]
-    out_prefix = osp.join(save_dir, osp.basename(out_prefix))
+    # out_prefix = osp.splitext(stats_fn)[0]
+    # out_prefix = osp.join(save_dir, osp.basename(out_prefix))
+    out_prefix = osp.join(save_dir, label1)
 
     hist_out_fn = out_prefix + '_thr%g.png' % thresh
     plot_hist(prob_avg_vec, bins, show_hist, hist_out_fn)
@@ -43,6 +64,9 @@ def load_prob_stats_and_calc_hist_thresh(stats_fn, num_ids, num_images=-1,
     fp.close()
 
     if stats_fn2:
+        if not label2:
+            label2 = get_auto_label(stats_fn2)
+
         prob_avg_vec2, max_label_vec2 = load_prob_stats(stats_fn2, num_ids2)
         print 'prob_avg_vec2.shape: ', prob_avg_vec2.shape
         hist, bins = get_hist(prob_avg_vec2)
@@ -50,8 +74,9 @@ def load_prob_stats_and_calc_hist_thresh(stats_fn, num_ids, num_images=-1,
 
         print 'Otsu_threshold for file2: ', thresh2
 
-        out_prefix2 = osp.splitext(stats_fn2)[0]
-        out_prefix2 = osp.join(save_dir, osp.basename(out_prefix2))
+        # out_prefix2 = osp.splitext(stats_fn2)[0]
+        # out_prefix2 = osp.join(save_dir, osp.basename(out_prefix2))
+        out_prefix2 = osp.join(save_dir, label2)
 
         hist_out_fn2 = out_prefix2 + '_thr%g.png' % thresh2
         plot_hist(prob_avg_vec2, bins, show_hist, hist_out_fn2)
