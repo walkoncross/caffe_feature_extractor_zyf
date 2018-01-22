@@ -121,11 +121,14 @@ def load_feats_and_stat_corr_to_avg_feats(img_list_fn, feats_dir,
     inter_ids_std_max = np.ones(2) * -1.0e10
 
     for i in range(num_ids):
-        probs_sum_vec[i] /= cnt_per_id_vec[i]
-        probs_sqsum_vec[i] /= cnt_per_id_vec[i]
-        probs_sqsum_vec[i] -= np.square(probs_sum_vec[i])
+        if cnt_per_id_vec[i]:
+            probs_sum_vec[i] /= cnt_per_id_vec[i]
+            probs_sqsum_vec[i] /= cnt_per_id_vec[i]
+            probs_sqsum_vec[i] -= np.square(probs_sum_vec[i])
 
-        max_label = np.argmax(probs_sum_vec[i])
+            max_label = np.argmax(probs_sum_vec[i])
+        else:
+            max_label = -1
 
         inter_ids_avg_min[0] = min(
             inter_ids_avg_min[0], probs_sum_vec[i][max_label])
