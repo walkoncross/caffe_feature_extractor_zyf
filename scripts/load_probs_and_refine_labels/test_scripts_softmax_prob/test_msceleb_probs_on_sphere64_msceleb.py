@@ -6,7 +6,7 @@ import numpy as np
 
 if __name__ == '__main__':
 
-    prob_threshs = np.arange(0.615, 0.7, 0.75, 0.8)
+    prob_threshs = [0.615, 0.7, 0.75, 0.8]
     first_new_id = 0
     max_orig_label = 78770
 
