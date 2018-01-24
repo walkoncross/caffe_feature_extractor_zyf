@@ -81,10 +81,17 @@ def load_feats_and_stat_corr_to_avg_feats(img_list_fn, feats_dir,
 
         ttl_img_cnt += 1
 
+        loaded = False
         if osp.exists(npy_fn) and not force_recalc:
             # print('\n===> corr_to_avg_feats already exists, will load it')
-            probs = np.load(npy_fn)
-        else:
+            try:
+                probs = np.load(npy_fn)
+                loaded = True
+            except:
+                # if the .npy file is broken
+                print('===> Failed to load: ' + npy_fn)
+                print('will recalc it')
+        if not loaded:
             feat = load_feature(feats_dir, img_fn)
 
             probs = calc_corr_to_avg_feats(feat, avg_feat_set)
