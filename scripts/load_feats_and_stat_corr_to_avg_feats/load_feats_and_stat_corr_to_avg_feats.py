@@ -46,7 +46,7 @@ def calc_corr_to_avg_feats(feats, avg_feat_set):
 
 def load_feats_and_stat_corr_to_avg_feats(img_list_fn, feats_dir,
                                           avg_feat_fn, save_dir=None,
-                                          num_images=-1):
+                                          num_images=-1, force_recalc=False):
     if not osp.exists(save_dir):
         os.makedirs(save_dir)
 
@@ -81,10 +81,14 @@ def load_feats_and_stat_corr_to_avg_feats(img_list_fn, feats_dir,
 
         ttl_img_cnt += 1
 
-        feat = load_feature(feats_dir, img_fn)
+        if osp.exists(npy_fn) and not force_recalc:
+            # print('\n===> corr_to_avg_feats already exists, will load it')
+            probs = np.load(npy_fn)
+        else:
+            feat = load_feature(feats_dir, img_fn)
 
-        probs = calc_corr_to_avg_feats(feat, avg_feat_set)
-        np.save(npy_fn, probs)
+            probs = calc_corr_to_avg_feats(feat, avg_feat_set)
+            np.save(npy_fn, probs)
 
         probs_sum_vec[orig_label] += probs.T
         probs_sqsum_vec[orig_label] += np.square(probs.T)
@@ -202,6 +206,8 @@ if __name__ == '__main__':
     avg_feat_fn = '../extract_and_save_probs_stats/rlt_probs_stats/fc5_feat_avg_for_ids.npy'
     num_images = -1
     save_dir = './rlt_stats_feats_corr_to_avg_feats'
+    force_recalc = False
 
     load_feats_and_stat_corr_to_avg_feats(img_list_fn, feat_dir,
-                                 avg_feat_fn, save_dir, num_images)
+                                          avg_feat_fn, save_dir,
+                                          num_images, force_recalc)
