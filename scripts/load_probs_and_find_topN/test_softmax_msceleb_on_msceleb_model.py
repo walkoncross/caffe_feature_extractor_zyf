@@ -8,7 +8,8 @@ if __name__ == '__main__':
 
     num_ids = 78771
     num_images = -1
-    top_n = 10
+    # top_n = 10
+    top_n = -1  # <=0 means sort all feats under each id and save all of them in descending order
     save_dir = '../prob-results/msceleb_probs_on_sphere64_msceleb/rlt_top_%d_softmax_per_id_img_list' % top_n
 
     load_probs_and_find_topN(prob_dir, num_ids,
