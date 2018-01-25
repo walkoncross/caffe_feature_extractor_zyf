@@ -74,7 +74,7 @@ def load_probs_and_find_topN(prob_dir, num_ids,
 
         sorted_idx = np.argsort(np.array(prob_list))
         cnt = top_n
-        if len(img_list) < top_n:
+        if top_n <= 0 or len(img_list) < top_n:
             cnt = len(img_list)
 
         for j in sorted_idx[-1:-cnt - 1:-1]:
@@ -93,7 +93,7 @@ if __name__ == '__main__':
 
     num_ids = 3
     num_images = -1
-    top_n = 10
+    top_n = 10  # <=0 means sort all feats under each id and save all of them in descending order
     save_dir = './rlt_top_%d_img_list' % top_n
 
     load_probs_and_find_topN(prob_dir, num_ids,
