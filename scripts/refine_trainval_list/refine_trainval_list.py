@@ -77,6 +77,6 @@ if __name__ == '__main__':
     refined_list_fn = '../prob-results/msceleb_probs_on_sphere64_msceleb/corr_prob_to_avg_threshed_results/prob_thresh_0.5333-overlap-img_list.txt'
     refined_nonoverlap_list_fn = '../prob-results/msceleb_probs_on_sphere64_msceleb/corr_prob_to_avg_threshed_results/prob_thresh_0.5333-nonoverlap-img_list.txt'
 
-    save_suffix = '_refined_by_fc5_corr_to_avg'
+    save_suffix = '_refined_thr0.5333'
     refine_trainval_list(trainval_list_fns, refined_list_fn,
                          refined_nonoverlap_list_fn, save_suffix)
