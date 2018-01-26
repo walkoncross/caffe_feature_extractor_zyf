@@ -70,10 +70,15 @@ def refine_trainval_list(trainval_list_fns,
 
 
 if __name__ == '__main__':
+    # trainval_list_fns = [
+    #     '/disk2/zhaoyafei/face-recog-train/train-val-lists/msceleb-1m/msceleb_fixed2_train_list_ratio-0.95_78771-ids_4833609-objs_171208-230236.txt',
+    #     '/disk2/zhaoyafei/face-recog-train/train-val-lists/msceleb-1m/msceleb_fixed2_val_list_ratio-0.05_70111-ids_215196-objs_171208-230236.txt'
+    # ]
     trainval_list_fns = [
-        '/disk2/zhaoyafei/face-recog-train/train-val-lists/msceleb-1m/msceleb_fixed2_train_list_ratio-0.95_78771-ids_4833609-objs_171208-230236.txt',
-        '/disk2/zhaoyafei/face-recog-train/train-val-lists/msceleb-1m/msceleb_fixed2_val_list_ratio-0.05_70111-ids_215196-objs_171208-230236.txt'
-    ]
+        '/disk2/zhaoyafei/face-recog-train/train-val-lists/msceleb-1m/msceleb_fixed2_train_list_ratio-0.9_78771-ids_4579332-objs_171208-230319.txt',
+        '/disk2/zhaoyafei/face-recog-train/train-val-lists/msceleb-1m/msceleb_fixed2_val_list_ratio-0.1_75820-ids_469473-objs_171208-230319.txt',
+        '/disk2/zhaoyafei/face-recog-train/train-val-lists/msceleb-1m/MS-Celeb-1M_clean_list_fixed2_78771_ids_5048805_imgs.txt'
+    ]    
     refined_list_fn = '../prob-results/msceleb_probs_on_sphere64_msceleb/corr_prob_to_avg_threshed_results/prob_thresh_0.5333-overlap-img_list.txt'
     refined_nonoverlap_list_fn = '../prob-results/msceleb_probs_on_sphere64_msceleb/corr_prob_to_avg_threshed_results/prob_thresh_0.5333-nonoverlap-img_list.txt'
 
