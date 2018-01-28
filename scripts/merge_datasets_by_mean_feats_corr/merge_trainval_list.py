@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
     # val list files
     val_list_fns = [
-        'msceleb_fixed2_val_list_ratio-0.05_70111-ids_215196-objs_171208-230236_refined_thr0.5333.txt',
+        'msceleb-1m/msceleb_fixed2_val_list_ratio-0.05_70111-ids_215196-objs_171208-230236_refined_thr0.5333.txt',
         'asian/face_asian_val_list_ratio-0.05_9964-ids_21897-objs_170818-225309.txt',
         'webface/webface_val_list_ratio-0.05_6770-ids_17026-objs_171226-051743.txt',
         'vggface2/vggface2_val_list_ratio-0.05_8631-ids_152995-objs_171115-224724.txt'
