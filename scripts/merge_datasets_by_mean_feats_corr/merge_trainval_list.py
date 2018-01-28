@@ -64,8 +64,8 @@ if __name__ == '__main__':
         'vggface2/vggface2_train_list_ratio-0.95_8631-ids_2988783-objs_171115-224724.txt'
         # 'vggface/train_list_ratio-0.95_2564-ids_1643339-objs_170727-211449.txt'
     ]
-    for it in train_list_fns:
-        it = osp.join(root_dir1, it)
+    
+    train_list_fns = [ osp.join(root_dir1, it) for it in train_list_fns]
 
     # val list files
     val_list_fns = [
@@ -75,8 +75,8 @@ if __name__ == '__main__':
         'vggface2/vggface2_val_list_ratio-0.05_8631-ids_152995-objs_171115-224724.txt'
         # 'vggface/val_list_ratio-0.05_2564-ids_85226-objs_170727-211449.txt'
     ]
-    for it in train_list_fns:
-        it = osp.join(root_dir1, it)
+
+    val_list_fns = [ osp.join(root_dir1, it) for it in val_list_fns]
 
     # new id map files
     root_dir2 = './rlt_merge_id_map_delete_overlap/'
@@ -88,8 +88,7 @@ if __name__ == '__main__':
         # 'vggface_merge_with_msceleb_asian_webface_vggface2_new_id_map.txt',
     ]
 
-    for it in new_id_map_fns:
-        it = osp.join(root_dir2, it)
+    new_id_map_fns = [ osp.join(root_dir2, it) for it in new_id_map_fns]
 
     # image root dirs
     img_root_dirs = [
