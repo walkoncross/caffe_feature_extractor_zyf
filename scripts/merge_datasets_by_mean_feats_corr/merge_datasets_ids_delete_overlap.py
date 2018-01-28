@@ -24,8 +24,8 @@ def get_output_fn_prefix(data_labels, i, j):
 
     fn_prefix = data_labels[i] + '_merge_with'
 
-    for k in range(i + 1, j):
-        fn_prefix += '_' + data_labels[i]
+    for k in range(j, i):
+        fn_prefix += '_' + data_labels[k]
 
     return fn_prefix
 
@@ -63,7 +63,7 @@ def merge_datasets_ids_without_overlap(data_labels,
         for j in range(0, i):
             fn = get_inter_dataset_corr_fn(data_labels[i], data_labels[j])
             fn = osp.join(inter_datasets_corr_file_dir, fn)
-            write_string = '---> np.loadtxt from: {}\n'.format(fn)
+            write_string = '---> Load data from: {}\n'.format(fn)
             print(write_string)
             fp_log.write(write_string)
 
@@ -93,7 +93,7 @@ def merge_datasets_ids_without_overlap(data_labels,
             print(write_string)
             fp_log.write(write_string)
 
-        fn_prefix = get_output_fn_prefix(data_labels, i, j)
+        fn_prefix = get_output_fn_prefix(data_labels, i, 0)
         fn_out = osp.join(save_dir, fn_prefix + '_new_id_map.txt')
         fp_out = open(fn_out, 'w')
 
@@ -113,8 +113,7 @@ def merge_datasets_ids_without_overlap(data_labels,
 
         num_new_ids = new_id
 
-        write_string = '---> total new ids added: {}\n'.format(
-            num_new_ids - init_num_ids)
+        write_string = '---> total new ids added: {}\n'.format(num_new_ids - init_num_ids)
         print(write_string)
         fp_log.write(write_string)
 
