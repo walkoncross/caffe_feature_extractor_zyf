@@ -22,7 +22,7 @@ def merge_trainval_list(trainval_fns, new_id_map_fns, save_fn, root_dirs=None):
     if root_dirs:
         assert(len(trainval_fns) == len(root_dirs))
 
-    print 'Will save merge result into file: ', save_fn
+    print '===> Will save merge result into file: ', save_fn
     save_dir = osp.dirname(save_fn)
     if save_dir and not osp.exists(save_dir):
         os.makedirs(save_dir)
@@ -30,12 +30,14 @@ def merge_trainval_list(trainval_fns, new_id_map_fns, save_fn, root_dirs=None):
     fp_out = open(save_fn, 'w')
 
     for i, list_fn in enumerate(trainval_fns):
+        print '===> Merging image list: ', list_fn
+
         fp = open(list_fn, 'r')
 
         root_dir = ''
         if root_dirs and root_dirs[i]:
             root_dir = root_dirs[i]
-            if not root_dir.endwith('/') or not root_dir.endwith('\\'):
+            if not root_dir.endswith('/') or not root_dir.endswith('\\'):
                 root_dir += '/'
 
         if i == 0:
