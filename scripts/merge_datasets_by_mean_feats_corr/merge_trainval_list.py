@@ -63,7 +63,7 @@ if __name__ == '__main__':
     # train list files
     root_dir1 = '/disk2/zhaoyafei/face-recog-train/train-val-lists'
     train_list_fns = [
-        'msceleb-1m/msceleb_fixed2_train_list_ratio-0.95_78771-ids_4833609-objs_171208-230236_refined_thr0.5333-nonoverlap.txt',
+        'msceleb-1m/msceleb_fixed2_train_list_ratio-0.95_78771-ids_4833609-objs_171208-230236_refined_thr0.5333.txt',
         'asian/face_asian_train_list_ratio-0.95_10245-ids_518838-objs_170818-225309.txt',
         'webface/webface_train_list_ratio-0.95_10572-ids_433705-objs_171226-051743.txt',
         'vggface2/vggface2_train_list_ratio-0.95_8631-ids_2988783-objs_171115-224724.txt'
@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
     # val list files
     val_list_fns = [
-        'msceleb_fixed2_val_list_ratio-0.05_70111-ids_215196-objs_171208-230236_refined_thr0.5333-nonoverlap.txt',
+        'msceleb_fixed2_val_list_ratio-0.05_70111-ids_215196-objs_171208-230236_refined_thr0.5333.txt',
         'asian/face_asian_val_list_ratio-0.05_9964-ids_21897-objs_170818-225309.txt',
         'webface/webface_val_list_ratio-0.05_6770-ids_17026-objs_171226-051743.txt',
         'vggface2/vggface2_val_list_ratio-0.05_8631-ids_152995-objs_171115-224724.txt'
@@ -109,5 +109,5 @@ if __name__ == '__main__':
                         train_save_fn, img_root_dirs)
 
     val_save_fn = 'val_list_merged_msceleb_asian_webface_vggface2_0.05.txt'
-    merge_trainval_list(train_list_fns, new_id_map_fns,
+    merge_trainval_list(val_list_fns, new_id_map_fns,
                         val_save_fn, img_root_dirs)
