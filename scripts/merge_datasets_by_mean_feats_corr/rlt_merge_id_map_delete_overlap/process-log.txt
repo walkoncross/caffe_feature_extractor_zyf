@@ -1,0 +1,86 @@
+
+===> Merging dataset: asian
+---> Load data from: C:\zyf\dnn_models\face_models\face-datasets-merge\inter_datasets_avg_fc5_feats_corr_msceleb\corr_mat-asian-vs-msceleb.txt
+num of orig ids: 10245
+ids overlapped with msceleb: 2128
+remained ids: 8117
+-----------------
+ids overlapped with all the previous datasets: 2128
+remained ids: 8117
+---> save new_id_map into file: ./rlt_merge_id_map_delete_overlap\asian_merge_with_msceleb_new_id_map.txt
+---> total new ids added: 8117
+
+===> Merging dataset: webface
+---> Load data from: C:\zyf\dnn_models\face_models\face-datasets-merge\inter_datasets_avg_fc5_feats_corr_msceleb\corr_mat-webface-vs-msceleb.txt
+num of orig ids: 10572
+ids overlapped with msceleb: 5285
+remained ids: 5287
+-----------------
+ids overlapped with all the previous datasets: 5285
+remained ids: 5287
+---> Load data from: C:\zyf\dnn_models\face_models\face-datasets-merge\inter_datasets_avg_fc5_feats_corr_msceleb\corr_mat-webface-vs-asian.txt
+num of orig ids: 10572
+ids overlapped with asian: 53
+remained ids: 10519
+-----------------
+ids overlapped with all the previous datasets: 5287
+remained ids: 5285
+---> save new_id_map into file: ./rlt_merge_id_map_delete_overlap\webface_merge_with_msceleb_asian_new_id_map.txt
+---> total new ids added: 13402
+
+===> Merging dataset: vggface2
+---> Load data from: C:\zyf\dnn_models\face_models\face-datasets-merge\inter_datasets_avg_fc5_feats_corr_msceleb\corr_mat-vggface2-vs-msceleb.txt
+num of orig ids: 8631
+ids overlapped with msceleb: 5867
+remained ids: 2764
+-----------------
+ids overlapped with all the previous datasets: 5867
+remained ids: 2764
+---> Load data from: C:\zyf\dnn_models\face_models\face-datasets-merge\inter_datasets_avg_fc5_feats_corr_msceleb\corr_mat-vggface2-vs-asian.txt
+num of orig ids: 8631
+ids overlapped with asian: 223
+remained ids: 8408
+-----------------
+ids overlapped with all the previous datasets: 5886
+remained ids: 2745
+---> Load data from: C:\zyf\dnn_models\face_models\face-datasets-merge\inter_datasets_avg_fc5_feats_corr_msceleb\corr_mat-vggface2-vs-webface.txt
+num of orig ids: 8631
+ids overlapped with webface: 996
+remained ids: 7635
+-----------------
+ids overlapped with all the previous datasets: 5985
+remained ids: 2646
+---> save new_id_map into file: ./rlt_merge_id_map_delete_overlap\vggface2_merge_with_msceleb_asian_webface_new_id_map.txt
+---> total new ids added: 16048
+
+===> Merging dataset: vggface
+---> Load data from: C:\zyf\dnn_models\face_models\face-datasets-merge\inter_datasets_avg_fc5_feats_corr_msceleb\corr_mat-vggface-vs-msceleb.txt
+num of orig ids: 2564
+ids overlapped with msceleb: 2256
+remained ids: 308
+-----------------
+ids overlapped with all the previous datasets: 2256
+remained ids: 308
+---> Load data from: C:\zyf\dnn_models\face_models\face-datasets-merge\inter_datasets_avg_fc5_feats_corr_msceleb\corr_mat-vggface-vs-asian.txt
+num of orig ids: 2564
+ids overlapped with asian: 32
+remained ids: 2532
+-----------------
+ids overlapped with all the previous datasets: 2257
+remained ids: 307
+---> Load data from: C:\zyf\dnn_models\face_models\face-datasets-merge\inter_datasets_avg_fc5_feats_corr_msceleb\corr_mat-vggface-vs-webface.txt
+num of orig ids: 2564
+ids overlapped with webface: 1835
+remained ids: 729
+-----------------
+ids overlapped with all the previous datasets: 2449
+remained ids: 115
+---> Load data from: C:\zyf\dnn_models\face_models\face-datasets-merge\inter_datasets_avg_fc5_feats_corr_msceleb\corr_mat-vggface-vs-vggface2.txt
+num of orig ids: 2564
+ids overlapped with vggface2: 72
+remained ids: 2492
+-----------------
+ids overlapped with all the previous datasets: 2451
+remained ids: 113
+---> save new_id_map into file: ./rlt_merge_id_map_delete_overlap\vggface_merge_with_msceleb_asian_webface_vggface2_new_id_map.txt
+---> total new ids added: 16161
