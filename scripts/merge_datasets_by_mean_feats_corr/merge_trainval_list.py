@@ -22,8 +22,9 @@ def merge_trainval_list(trainval_fns, new_id_map_fns, save_fn, root_dirs=None):
     if root_dirs:
         assert(len(trainval_fns) == len(root_dirs))
 
+    print 'Will save merge result into file: ', save_fn
     save_dir = osp.dirname(save_fn)
-    if not osp.exists(save_dir):
+    if save_dir and not osp.exists(save_dir):
         os.makedirs(save_dir)
 
     fp_out = open(save_fn, 'w')
