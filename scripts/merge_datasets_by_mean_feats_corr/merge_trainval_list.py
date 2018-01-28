@@ -47,13 +47,16 @@ def merge_trainval_list(trainval_fns, new_id_map_fns, save_fn, root_dirs=None):
         else:
             new_id_map = load_new_id_map(new_id_map_fns[i])
             for line in fp:
-                spl = line.split(line)
+                spl = line.split()
                 img_fn = root_dir + spl[0]
                 orig_id = int(spl[1])
 
                 new_id = new_id_map[orig_id, 1]
                 if new_id >= 0:
                     fp_out.write('%s %d\n' % (img_fn, new_id))
+        fp.close()
+
+    fp_out.close()
 
 
 if __name__ == '__main__':
@@ -66,8 +69,8 @@ if __name__ == '__main__':
         'vggface2/vggface2_train_list_ratio-0.95_8631-ids_2988783-objs_171115-224724.txt'
         # 'vggface/train_list_ratio-0.95_2564-ids_1643339-objs_170727-211449.txt'
     ]
-    
-    train_list_fns = [ osp.join(root_dir1, it) for it in train_list_fns]
+
+    train_list_fns = [osp.join(root_dir1, it) for it in train_list_fns]
 
     # val list files
     val_list_fns = [
@@ -78,7 +81,7 @@ if __name__ == '__main__':
         # 'vggface/val_list_ratio-0.05_2564-ids_85226-objs_170727-211449.txt'
     ]
 
-    val_list_fns = [ osp.join(root_dir1, it) for it in val_list_fns]
+    val_list_fns = [osp.join(root_dir1, it) for it in val_list_fns]
 
     # new id map files
     root_dir2 = './rlt_merge_id_map_delete_overlap/'
@@ -90,7 +93,7 @@ if __name__ == '__main__':
         # 'vggface_merge_with_msceleb_asian_webface_vggface2_new_id_map.txt',
     ]
 
-    new_id_map_fns = [ osp.join(root_dir2, it) for it in new_id_map_fns]
+    new_id_map_fns = [osp.join(root_dir2, it) for it in new_id_map_fns]
 
     # image root dirs
     img_root_dirs = [
