@@ -525,8 +525,8 @@ if __name__ == '__main__':
     config_json = './extractor_config.json'
     save_dir = 'feature_rlt_sphere64_eltavg_norm'
 
-    image_dir = r'C:\zyf\github\mtcnn-caffe-good-new\face_aligner\face_chips'
-    image_list_file = r'C:\zyf\github\lfw-evaluation-zyf\extract_face_features\face_chips\face_chips_list_2.txt'
+    image_dir = r'../test_data/face_chips'
+    image_list_file = r'../test_data/face_chips_list.txt'
 
     if not osp.exists(save_dir):
         os.makedirs(save_dir)
@@ -536,12 +536,12 @@ if __name__ == '__main__':
 
     img_list = load_image_list(image_list_file)
 
-    # print'\n===> test extract_features_for_image_list()'
-
     # init a feat_extractor, use a context to release caffe objects
-    # print'\n===> init a feat_extractor'
+    print'\n===> init a feat_extractor'
     feat_extractor = CaffeFeatureExtractor(config_json)
     feat_layer_names = feat_extractor.get_feature_layers()
+
+    # print'\n===> test extract_features_for_image_list()'
 
     ftrs = feat_extractor.extract_features_for_image_list(img_list, image_dir)
 #    np.save(osp.join(save_dir, save_name), ftrs)
@@ -566,11 +566,11 @@ if __name__ == '__main__':
             np.save(osp.join(save_sub_dir, save_name), ftrs[layer][i])
 
     # test extract_feature()
-    # print'\n===> test extract_feature()'
+     print'\n===> test extract_feature()'
     save_name_2 = 'single_feature.npy'
     layer = feat_layer_names[0]
     ftr = feat_extractor.extract_feature(osp.join(image_dir, img_list[0]))
     np.save(osp.join(save_dir, save_name_2), ftr[layer])
 
     ft_diff = ftr[layer] - ftrs[layer][0]
-    # print'ft_diff: ', ft_diff.sum()
+     print'ft_diff: ', ft_diff.sum()

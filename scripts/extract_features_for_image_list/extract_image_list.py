@@ -78,6 +78,8 @@ if __name__ == '__main__':
     save_dir = 'feature_rlt_sphere64_noflip'
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
-    image_dir = r'C:\zyf\github\mtcnn-caffe-good-new\face_aligner\face_chips'
-    image_list_file = r'C:\zyf\github\lfw-evaluation-zyf\extract_face_features\face_chips\face_chips_list_2.txt'
+#    image_dir = r'C:\zyf\github\mtcnn-caffe-zyf\face_aligner\face_chips'
+#    image_list_file = r'C:\zyf\github\lfw-evaluation-zyf\extract_face_features\face_chips\face_chips_list_2.txt'
+    image_dir = r'../../test_data/face_chips'
+    image_list_file = r'../../test_data/face_chips_list.txt'
     main(config_json, save_dir, image_list_file, image_dir)

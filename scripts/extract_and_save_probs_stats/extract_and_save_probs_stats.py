@@ -281,8 +281,8 @@ if __name__ == '__main__':
     max_orig_label = 2
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
-    image_dir = r'C:\zyf\github\mtcnn-caffe-good-new\face_aligner\face_chips'
-    image_list_file = r'.\face_chips_list_with_label.txt'
+    image_dir = r'../../test_data/face_chips'
+    image_list_file = r'../../test_data/face_chips_list_with_label.txt'
 
     save_dir = 'rlt_probs_stats'
     num_images = -1

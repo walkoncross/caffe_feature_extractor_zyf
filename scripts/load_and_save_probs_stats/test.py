@@ -9,7 +9,7 @@ if __name__ == '__main__':
     max_orig_label = 2
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
-    image_list_file = r'.\face_chips_list_with_label.txt'
+    image_list_file = r'../../test_data/face_chips_list_with_label.txt'
 
     save_dir = 'rlt_load_save_probs_stats'
     num_images = -1
