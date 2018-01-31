@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+import sys
 from extract_features import extract_features
 
 
@@ -6,6 +7,9 @@ if __name__ == '__main__':
     config_json = './extractor_config_sphere64_pod.json'
     save_dir = 'facescrub-features-sphereface-64'
     gpu_id = None
+
+    if len(sys.argv) > 1:
+        gpu_id = int(sys.argv[1])
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
     image_dir = r'/workspace/code/mtcnn-caffe-zyf/scripts/face_aligner/facescrub_mtcnn_aligned/aligned_imgs'
