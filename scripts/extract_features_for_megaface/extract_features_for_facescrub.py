@@ -5,8 +5,9 @@ from extract_features import extract_features
 if __name__ == '__main__':
     config_json = './extractor_config_sphere64_pod.json'
     save_dir = 'facescrub-features-sphereface-64'
+    gpu_id = None
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
     image_dir = r'/workspace/code/mtcnn-caffe-zyf/scripts/face_aligner/facescrub_mtcnn_aligned/aligned_imgs'
     image_list_file = r'/workspace/data/__face_datasets__/MegaFace/facescrub-list-aligned-imgs.txt'
-    extract_features(config_json, save_dir, image_list_file, image_dir)
+    extract_features(config_json, save_dir, image_list_file, image_dir, gpu_id)

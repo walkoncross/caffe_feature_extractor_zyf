@@ -1,6 +1,7 @@
 import os
 import os.path as osp
 import numpy as np
+import json
 
 import _init_paths
 from caffe_feature_extractor import CaffeFeatureExtractor
@@ -68,10 +69,10 @@ def process_image_list(feat_extractor, img_list,
         sub_dir, save_name = get_image_sub_dir_and_save_fn(img_list[i])
 
         for layer in feat_layer_names:
-#            if sub_dir:
-#                save_sub_dir = osp.join(save_dir, layer, sub_dir)
-#            else:
-#                save_sub_dir = osp.join(save_dir, layer)
+            #            if sub_dir:
+            #                save_sub_dir = osp.join(save_dir, layer, sub_dir)
+            #            else:
+            #                save_sub_dir = osp.join(save_dir, layer)
             save_sub_dir = osp.join(save_dir, layer, sub_dir)
 
             if not osp.exists(save_sub_dir):
@@ -85,10 +86,21 @@ def process_image_list(feat_extractor, img_list,
 def extract_features(config_json, save_dir,
                      image_list_file, image_dir,
                      check_src_exist=True,
-                     skip_dst_exist=True):
+                     skip_dst_exist=True,
+                     gpu_id=None):
 
     if not osp.exists(save_dir):
         os.makedirs(save_dir)
+
+    if gpu_id is not None:
+        gpu_id = int(gpu_id)
+        fp = open(config_json)
+        config_json = json.load(fp)
+        fp.close()
+
+        print '===> overwirte gpu_id from {} in config file into {}'.format(
+            config_json['gpu_id'], gpu_id)
+        config_json['gpu_id'] = gpu_id
 
     fp = open(image_list_file, 'r')
 
@@ -151,10 +163,11 @@ def extract_features(config_json, save_dir,
 if __name__ == '__main__':
     config_json = '../extractor_config_sphere64.json'
     save_dir = 'rlt_feats_face_chips'
+    gpu_id = None
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
     # image_dir = r'C:\zyf\github\mtcnn-caffe-zyf\face_aligner\face_chips'
     # image_list_file = r'C:\zyf\github\lfw-evaluation-zyf\extract_face_features\face_chips\face_chips_list_2.txt'
     image_dir = r'../../test_data/face_chips'
     image_list_file = r'../../test_data/face_chips_list.txt'
-    extract_features(config_json, save_dir, image_list_file, image_dir)
+    extract_features(config_json, save_dir, image_list_file, image_dir, gpu_id)
