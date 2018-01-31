@@ -20,8 +20,8 @@ try:
 except ImportError as err:
     raise ImportError('{}. Please set the correct caffe_root in {} '
                       'or in the first line of your main python script.'.format(
-                        err, osp.abspath(osp.dirname(__file__)) + '/_init_paths.py')
-                    )
+                          err, osp.abspath(osp.dirname(__file__)) + '/_init_paths.py')
+                      )
 
 
 # from caffe import Classifier
@@ -168,7 +168,8 @@ class CaffeFeatureExtractor(object):
         # print'---> batch size in the config: ', self.batch_size
 
         if self.config['mirror_trick'] > 0:
-            # print'---> need to double the batch size of the net input data because of mirror_trick'
+            # print'---> need to double the batch size of the net input data
+            # because of mirror_trick'
             final_batch_size = self.batch_size * 2
         else:
             final_batch_size = self.batch_size
@@ -178,7 +179,8 @@ class CaffeFeatureExtractor(object):
         # reshape net into final_batch_size
         if self.input_shape[0] != final_batch_size:
             try:
-                # print'---> reshape net input batch size from %d to %d' % (self.input_shape[0], final_batch_size)
+                # print'---> reshape net input batch size from %d to %d' %
+                # (self.input_shape[0], final_batch_size)
                 self.net.blobs['data'].reshape(
                     final_batch_size, self.input_shape[1], self.input_shape[2], self.input_shape[3])
                 # print'---> reshape the net blobs'
@@ -188,7 +190,8 @@ class CaffeFeatureExtractor(object):
 
             self.input_shape = self.net.blobs['data'].data.shape
 
-            # print'---> after reshape, net input data shape: ', self.input_shape
+            # print'---> after reshape, net input data shape: ',
+            # self.input_shape
 
         # print'---> the final input data shape: ', self.input_shape
 
@@ -478,7 +481,7 @@ class CaffeFeatureExtractor(object):
 
             img = self.load_image(path)
             # if cnt == 0:
-                # print'image shape: ', img.shape
+            # print'image shape: ', img.shape
 
             img_batch.append(img)
             t2 = time.clock()
@@ -537,7 +540,7 @@ if __name__ == '__main__':
     img_list = load_image_list(image_list_file)
 
     # init a feat_extractor, use a context to release caffe objects
-    print'\n===> init a feat_extractor'
+    print '\n===> init a feat_extractor'
     feat_extractor = CaffeFeatureExtractor(config_json)
     feat_layer_names = feat_extractor.get_feature_layers()
 
@@ -566,11 +569,11 @@ if __name__ == '__main__':
             np.save(osp.join(save_sub_dir, save_name), ftrs[layer][i])
 
     # test extract_feature()
-     print'\n===> test extract_feature()'
+    print '\n===> test extract_feature()'
     save_name_2 = 'single_feature.npy'
     layer = feat_layer_names[0]
     ftr = feat_extractor.extract_feature(osp.join(image_dir, img_list[0]))
     np.save(osp.join(save_dir, save_name_2), ftr[layer])
 
     ft_diff = ftr[layer] - ftrs[layer][0]
-     print'ft_diff: ', ft_diff.sum()
+    print 'ft_diff: ', ft_diff.sum()

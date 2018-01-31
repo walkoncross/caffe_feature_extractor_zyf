@@ -14,9 +14,10 @@ from numpy.linalg import norm
 def process_image_list(feat_extractor, prob_thresh,
                        last_new_id, new_id_map,
                        calc_orig_label_prob,
+                       save_dir,
                        out_fp1, out_fp2,
                        img_list, label_list=None,
-                       image_dir=None, save_dir=None,
+                       image_dir=None,
                        mirror_input=False):
 
     ftrs = feat_extractor.extract_features_for_image_list(
@@ -185,9 +186,10 @@ def extract_probs_and_refine_labels(config_json, prob_thresh,
             last_new_id = process_image_list(feat_extractor, prob_thresh,
                                              last_new_id, new_id_map,
                                              calc_orig_label_prob,
+                                             save_dir,
                                              output_fp1, output_fp2,
                                              img_list, label_list,
-                                             image_dir, save_dir, mirror_input)
+                                             image_dir, mirror_input)
             batch_img_cnt = 0
             img_list = []
             label_list = []
@@ -204,9 +206,10 @@ def extract_probs_and_refine_labels(config_json, prob_thresh,
         last_new_id = process_image_list(feat_extractor, prob_thresh,
                                          last_new_id, new_id_map,
                                          calc_orig_label_prob,
+                                         save_dir,
                                          output_fp1, output_fp2,
                                          img_list, label_list,
-                                         image_dir, save_dir, mirror_input)
+                                         image_dir, mirror_input)
 
     fp.close()
 

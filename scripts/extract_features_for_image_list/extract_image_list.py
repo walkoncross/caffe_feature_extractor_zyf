@@ -6,7 +6,8 @@ import _init_paths
 from caffe_feature_extractor import CaffeFeatureExtractor
 
 
-def process_image_list(feat_extractor, img_list, image_dir=None):
+def process_image_list(feat_extractor, img_list, 
+                        image_dir=None, save_dir=None):
     ftrs = feat_extractor.extract_features_for_image_list(img_list, image_dir)
 #    np.save(osp.join(save_dir, save_name), ftrs)
 
@@ -61,14 +62,14 @@ def main(config_json, save_dir, image_list_file, image_dir):
             batch_cnt += 1
             print '\n===> Processing batch #%d with %d images' % (batch_cnt, cnt)
 
-            process_image_list(feat_extractor, img_list, image_dir)
+            process_image_list(feat_extractor, img_list, image_dir, save_dir)
             cnt = 0
             img_list = []
 
     if cnt > 0:
         batch_cnt += 1
         print '\n===> Processing batch #%d with %d images' % (batch_cnt, cnt)
-        process_image_list(feat_extractor, img_list, image_dir)
+        process_image_list(feat_extractor, img_list, image_dir, save_dir)
 
     fp.close()
 
