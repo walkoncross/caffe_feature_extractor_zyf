@@ -125,8 +125,9 @@ def extract_features(config_json, save_dir,
         if line.startswith('#'):
             continue
 
-        items = line.split()
-        img_fn = items[0].strip()
+        # items = line.split()
+        # img_fn = items[0].strip()
+        img_fn = line.strip()
 
         if check_src_exist and not exist_src_img(image_dir, img_fn):
             print '---> Skip {}, source image not found'.format(img_fn)
@@ -170,4 +171,4 @@ if __name__ == '__main__':
     # image_list_file = r'C:\zyf\github\lfw-evaluation-zyf\extract_face_features\face_chips\face_chips_list_2.txt'
     image_dir = r'../../test_data/face_chips'
     image_list_file = r'../../test_data/face_chips_list.txt'
-    extract_features(config_json, save_dir, image_list_file, image_dir, gpu_id)
+    extract_features(config_json, save_dir, image_list_file, image_dir, gpu_id=gpu_id)

@@ -13,5 +13,5 @@ if __name__ == '__main__':
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
     image_dir = r'/workspace/code/mtcnn-caffe-zyf/scripts/face_aligner/facescrub_mtcnn_aligned/aligned_imgs'
-    image_list_file = r'/workspace/data/__face_datasets__/MegaFace/facescrub-list-aligned-imgs.txt'
-    extract_features(config_json, save_dir, image_list_file, image_dir, gpu_id)
+    image_list_file = r'/workspace/code/mtcnn-caffe-zyf/scripts/face_aligner/facescrub_mtcnn_aligned//facescrub-aligned-image-list-0130.txt'
+    extract_features(config_json, save_dir, image_list_file, image_dir, gpu_id=gpu_id)
