@@ -13,6 +13,6 @@ if __name__ == '__main__':
         gpu_id = int(sys.argv[1])
 
     # image path: osp.join(image_dir, <each line in image_list_file>)
-    image_dir = r'/workspace/code/mtcnn-caffe-zyf/scripts/face_aligner/megaface_mtcnn_aligned_dan/aligned_imgs'
+    image_dir = r'/workspace/code/mtcnn-caffe-zyf/scripts/face_aligner/megaface_mtcnn_aligned/aligned_imgs'
     image_list_file = r'/workspace/data/__face_datasets__/MegaFace/MegaFace_dataset/megaface-image-list-all.txt'
     extract_features(config_json, save_dir, image_list_file, image_dir, gpu_id=gpu_id)
