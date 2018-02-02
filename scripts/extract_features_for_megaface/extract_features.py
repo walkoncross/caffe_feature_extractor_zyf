@@ -3,7 +3,7 @@ import os.path as osp
 import numpy as np
 import json
 
-import ._init_paths
+import _init_paths
 from caffe_feature_extractor import CaffeFeatureExtractor
 
 from matio import save_mat
