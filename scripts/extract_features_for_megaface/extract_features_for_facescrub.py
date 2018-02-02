@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 import sys
-from extract_features import extract_features
+from extract_features_facescrub import extract_features
 
 
 if __name__ == '__main__':
