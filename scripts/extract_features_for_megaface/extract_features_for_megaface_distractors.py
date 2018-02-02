@@ -5,7 +5,7 @@ from extract_features import extract_features
 
 if __name__ == '__main__':
     config_json = './extractor_config_sphere64_pod.json'
-    save_dir = 'MegaFace_SPF512Features'
+    save_dir = '/workspace/data/megaface-eval/features/MegaFace_SPF512Features'
     gpu_id = None
 
     if len(sys.argv) > 1:
