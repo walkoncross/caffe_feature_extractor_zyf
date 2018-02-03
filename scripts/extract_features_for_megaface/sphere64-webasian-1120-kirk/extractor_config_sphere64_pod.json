@@ -1,0 +1,15 @@
+{
+    "network_prototxt": "/disk2/zhaoyafei/face-recog-train/sphereface-train-msceleb/sphereface_64_add_last_bn_deploy_fc6_prob.prototxt",
+    "network_caffemodel": "/disk2/zhaoyafei/face-recog-train/sphereface-train-merge_webface_asian/train-results/sphereface_64_last_bn_lamd10_ft_lambda5/sphereface_64_model_ft_56k_iter_24000.caffemodel",
+    "data_mean": "/disk2/zhaoyafei/center_face_mean_127.5_1x3.npy",
+    "feature_layer": "fc5",
+    "batch_size": 256,
+    "input_scale": 0.0078125,
+    "raw_scale": 255.0,
+    "channel_swap": "2, 1, 0",
+    "mirror_trick": 1,
+    "image_as_grey": 0,
+    "normalize_output": 1,
+    "cpu_only": 0,
+    "gpu_id": 0
+}
