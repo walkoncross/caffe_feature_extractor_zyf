@@ -3,7 +3,7 @@
     "network_caffemodel": "/disk2/zhaoyafei/face-model-packages/face-insight/caffe-r34-amf/model.caffemodel",
     "data_mean": "/disk2/zhaoyafei/center_face_mean_127.5_1x3.npy",
     "feature_layer": "fc1",
-    "batch_size": 256,
+    "batch_size": 72,
     "input_scale": 0.0078125,
     "raw_scale": 255.0,
     "channel_swap": "2, 1, 0",
