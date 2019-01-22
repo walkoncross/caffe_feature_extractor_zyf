@@ -67,10 +67,10 @@ class CaffeFeatureExtractor(object):
         self.batch_size = None
 
         self.config = {
-            #'network_prototxt': '/path/to/prototxt',
-            #'network_caffemodel': '/path/to/caffemodel',
-            #'data_mean': '/path/to/the/mean/file',
-            #'feature_layer': 'fc5',
+            # 'network_prototxt': '/path/to/prototxt',
+            # 'network_caffemodel': '/path/to/caffemodel',
+            # 'data_mean': '/path/to/the/mean/file',
+            # 'feature_layer': 'fc5',
             'batch_size': 1,
             'input_scale': 1.0,
             'raw_scale': 1.0,
@@ -100,7 +100,8 @@ class CaffeFeatureExtractor(object):
         _config['network_prototxt'] = str(_config['network_prototxt'])
         _config['network_caffemodel'] = str(_config['network_caffemodel'])
         _config['data_mean'] = str(_config['data_mean'])
-        _config['feature_layer'] = str(_config['feature_layer'])
+        if not isinstance(_config['feature_layer'], list):
+            _config['feature_layer'] = str(_config['feature_layer'])
         _config['channel_swap'] = tuple(
             [int(i.strip()) for i in _config['channel_swap'].split(',')])
 
